@@ -158,6 +158,19 @@ class Process
     }
 
     /**
+     * Perform code that is signal relevant using this method.
+     * It declares the PHP ticks so then the signal handlers are called.
+     *
+     * @param callable $handler
+     * @return mixed
+     */
+    public function callSignalSafeBlock(callable $handler) {
+        declare(ticks=1) {
+            return call_user_func($handler);
+        }
+    }
+
+    /**
      * Kills the child process.
      * Its not important who (parent or child process) calls this method, it will only kill the child process.
      */
