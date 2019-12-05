@@ -82,22 +82,37 @@ class Pipe
     /**
      * Receives data from another process. This method blocks until data was sent.
      *
+     * @param bool $blockThread     Blocks the thread until data is available
      * @return mixed
      */
-    public function receiveData() {
-        $reader = function($socket) {
-            if(@feof($socket))
-                return NULL;
+    public function receiveData(bool $blockThread = true) {
+        if($blockThread) {
+            $reader = function($socket) {
+                if(@feof($socket))
+                    return NULL;
 
-            $buf = "";
-            while ($out = socket_read($socket, static::BUFFER_SIZE)) {
-                $buf .= $out;
-                if(strlen($out) < static::BUFFER_SIZE) {
-                    break;
+                $buf = "";
+                while ($out = socket_read($socket, static::BUFFER_SIZE)) {
+                    $buf .= $out;
+                    if(strlen($out) < static::BUFFER_SIZE) {
+                        break;
+                    }
                 }
-            }
-            return $buf;
-        };
+                return $buf;
+            };
+        } else {
+            $reader = function ($socket) {
+                $buffer = "";
+                do {
+                    socket_recv($socket, $buf, 1024, MSG_DONTWAIT);
+                    if ($buf) {
+                        $buffer .= $buf;
+                    }
+                } while ($buf);
+                return $buffer;
+            };
+        }
+
 
         $data = $reader($this->receiver);
         return unserialize($data);
