@@ -35,6 +35,7 @@
 namespace Ikarus\SPS\Helper;
 
 
+use Ikarus\SPS\Exception\SignalException;
 use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Pipe;
 
@@ -56,6 +57,8 @@ class Process
     private $toParentPipe;
     /** @var Pipe */
     private $toChildPipe;
+
+    private $trappedSignals = [];
 
     /**
      * Process constructor.
@@ -130,7 +133,25 @@ class Process
                 $this->mainProcess = false;
                 $this->processID = getmypid();
 
-                call_user_func_array($this->callback, $arguments);
+                if($signals = $this->getTrappedSignals()) {
+                    foreach($signals as $signal) {
+                        pcntl_signal($signal, function($signo) {
+                            $e = new SignalException("Signal triggered", -1);
+                            $e->setSignal($signo);
+                            throw $e;
+                        });
+                    }
+                }
+                try {
+                    call_user_func_array($this->callback, $arguments);
+                } catch (SignalException $exception) {
+                    switch ($exception->getSignal()) {
+                        case SIGINT:
+                        case SIGTERM:
+                            exit( $exception->getSignal() );
+                    }
+                }
+
                 exit();
             }
         }
@@ -187,5 +208,22 @@ class Process
         } else {
             return $this->toChildPipe->receiveData($blockThread);
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getTrappedSignals(): array
+    {
+        return $this->trappedSignals;
+    }
+
+    /**
+     * @param array $trappedSignals
+     */
+    public function setTrappedSignals(array $trappedSignals): void
+    {
+        if(!$this->isRunning())
+            $this->trappedSignals = $trappedSignals;
     }
 }
