@@ -16,7 +16,9 @@
   "require" : {
     "php": "^7.2",
     "tasoft/event-manager": "dev-master",
-    "ext-sockets": "*"
+    "ext-sockets": "*",
+    "ext-pcntl": "*",
+    "ext-posix": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "^6"
