@@ -115,13 +115,16 @@ class Process
      *
      * Calling this method forks the process and establish the communication tunnel between them.
      *
+     * @param bool $processAsArgument
      * @param mixed ...$arguments
      */
-    public function run(...$arguments) {
+    public function run(bool $processAsArgument = true, ...$arguments) {
         if($this->isMainProcess() && !$this->isRunning()) {
             // Starts the process
             $this->toParentPipe = new Pipe();
             $this->toChildPipe = new Pipe();
+
+            $this->running = true;
 
             $pid = pcntl_fork();
             if($pid == -1)
@@ -143,7 +146,9 @@ class Process
                     }
                 }
                 try {
-                    call_user_func_array($this->callback, $arguments);
+                    if($processAsArgument)
+                        array_unshift($arguments, $this);
+                    call_user_func_array($this->getCallback(), $arguments);
                 } catch (SignalException $exception) {
                     switch ($exception->getSignal()) {
                         case SIGINT:
@@ -158,28 +163,16 @@ class Process
     }
 
     /**
-     * Perform code that is signal relevant using this method.
-     * It declares the PHP ticks so then the signal handlers are called.
-     *
-     * @param callable $handler
-     * @return mixed
-     */
-    public function callSignalSafeBlock(callable $handler) {
-        declare(ticks=1) {
-            return call_user_func($handler);
-        }
-    }
-
-    /**
      * Kills the child process.
      * Its not important who (parent or child process) calls this method, it will only kill the child process.
+     * @param int $signal
      */
-    public function kill() {
+    public function kill($signal = SIGINT) {
         if($this->isRunning()) {
             if($this->isMainProcess())
-                posix_kill($this->_childProcessID, SIGINT);
+                posix_kill($this->_childProcessID, $signal);
             else
-                posix_kill($this->processID, SIGINT);
+                posix_kill($this->processID, $signal);
         }
     }
 
