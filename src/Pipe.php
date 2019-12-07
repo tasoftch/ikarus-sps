@@ -92,10 +92,12 @@ class Pipe
                     return NULL;
 
                 $buf = "";
-                while ($out = socket_read($socket, static::BUFFER_SIZE)) {
-                    $buf .= $out;
-                    if(strlen($out) < static::BUFFER_SIZE) {
-                        break;
+                declare(ticks=1) {
+                    while ($out = socket_read($socket, static::BUFFER_SIZE)) {
+                        $buf .= $out;
+                        if(strlen($out) < static::BUFFER_SIZE) {
+                            break;
+                        }
                     }
                 }
                 return $buf;

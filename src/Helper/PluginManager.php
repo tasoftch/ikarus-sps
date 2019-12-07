@@ -63,10 +63,7 @@ class PluginManager implements PluginManagementInterface
      * @return bool
      */
     public function trapEvent(&$name, &$event, &$arguments) {
-        declare(ticks=1) {
-            // Necessary to catch interruption signals (SIGINT)
-            $data = $this->eventRunloopPipe->receiveData();
-        }
+        $data = $this->eventRunloopPipe->receiveData();
 
         if($data) {
             list($name, $event, $arguments) = unserialize( $data );
