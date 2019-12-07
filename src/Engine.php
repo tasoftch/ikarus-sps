@@ -140,13 +140,19 @@ class Engine
 
             try {
                 while ( $this->pluginManager->trapEvent($name, $event, $arguments) ) {
-                    $code = $this->canHandleDispatchedEvent($name, $event, $arguments);
+                    $code = $this->willHandleDispatchedEvent($name, $event, $arguments);
                     if($code == static::RUNLOOP_STOP_ENGINE)
                         break;
                     if($code == static::RUNLOOP_SKIP_EVENT)
                         continue;
 
                     $event = $this->eventManager->trigger($name, $event, ...$arguments);
+
+                    $code = $this->didHandleDispatchedEvent($name, $event, $arguments);
+                    if($code == static::RUNLOOP_STOP_ENGINE)
+                        break;
+                    if($code == static::RUNLOOP_SKIP_EVENT)
+                        continue;
 
                     if($event instanceof DispatchedEventResponseInterface) {
                         $this->pluginManager->postResponse($event);
@@ -220,7 +226,19 @@ class Engine
      * @param $arguments
      * @return int
      */
-    protected function canHandleDispatchedEvent($name, $event, $arguments): int {
+    protected function willHandleDispatchedEvent($name, $event, $arguments): int {
+        return static::RUNLOOP_CONTINUE;
+    }
+
+    /**
+     * Called after triggering an event coming from an SPS trigger, but before sending response events back to SPS.
+     *
+     * @param $name
+     * @param $event
+     * @param $arguments
+     * @return int
+     */
+    protected function didHandleDispatchedEvent($name, $event, $arguments): int {
         if(strcasecmp($name, 'quit') === 0) {
             return static::RUNLOOP_STOP_ENGINE;
         }
