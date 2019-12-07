@@ -80,8 +80,8 @@ class ErrorManager
             if($level < self::FATAL_ERROR_LEVEL) {
                 switch ($level) {
                     case static::NOTICE_ERROR_LEVEL    : echo CliColors::getColoredString( "** NOTICE    : ", CliColors::FG_DARK_GRAY); break;
-                    case static::WARNING_ERROR_LEVEL   : echo CliColors::getColoredString( "** WARNING   : ", CliColors::BG_YELLOW); break;
-                    case static::DEPRECATED_ERROR_LEVEL: echo CliColors::getColoredString( "** DEPRECATED: ", CliColors::BG_YELLOW); break;
+                    case static::WARNING_ERROR_LEVEL   : echo CliColors::getColoredString( "** WARNING   : ", CliColors::FG_YELLOW); break;
+                    case static::DEPRECATED_ERROR_LEVEL: echo CliColors::getColoredString( "** DEPRECATED: ", CliColors::FG_BROWN); break;
                     default:
                 }
                 echo $msg, " at $file on $line\n";
