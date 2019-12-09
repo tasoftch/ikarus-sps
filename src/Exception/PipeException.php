@@ -3,7 +3,7 @@
 namespace Ikarus\SPS\Exception;
 
 
-use Ikarus\SPS\Pipe;
+use TASoft\Util\Pipe;
 
 class PipeException extends SPSException
 {

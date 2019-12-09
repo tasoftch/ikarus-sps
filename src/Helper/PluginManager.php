@@ -38,7 +38,7 @@ namespace Ikarus\SPS\Helper;
 use Ikarus\SPS\Event\DispatchedEventInterface;
 use Ikarus\SPS\Event\DispatchedEventResponseInterface;
 use Ikarus\SPS\Plugin\PluginManagementInterface;
-use Ikarus\SPS\Pipe;
+use TASoft\Util\Pipe;
 
 class PluginManager implements PluginManagementInterface
 {
