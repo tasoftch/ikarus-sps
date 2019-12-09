@@ -49,23 +49,23 @@ use Throwable;
 class Engine
 {
     /** @var EventManager */
-    private $eventManager;
+    protected $eventManager;
     /** @var PluginManager */
-    private $pluginManager;
+    protected $pluginManager;
     /** @var ProcessManager */
-    private $processManager;
+    protected $processManager;
     /** @var ErrorManager */
-    private $errorManager;
+    protected $errorManager;
     /** @var string  */
     private $name;
     /** @var bool  */
-    private $running = false;
+    protected $running = false;
 
     /** @var PriorityCollection */
-    private $plugins;
+    protected $plugins;
 
     /** @var callable|null */
-    private $cleanUpHandler;
+    protected $cleanUpHandler;
 
 
     const RUNLOOP_CONTINUE = 1;
