@@ -42,7 +42,9 @@ use Ikarus\SPS\Event\ResponseEvent;
 
 class RemoteEventServerPlugin extends AbstractPlugin implements TriggerPluginInterface, TearDownPluginInterface
 {
+    /** @var string */
     private $address;
+    /** @var int  */
     private $port;
 
     /** @var string */
@@ -60,8 +62,8 @@ class RemoteEventServerPlugin extends AbstractPlugin implements TriggerPluginInt
     public function __construct($address, $port, $startMessage = 'Welcome to Remote Event Server of Ikarus SPS!')
     {
         parent::__construct("");
-        $this->address = $address;
-        $this->port = $port;
+        $this->address = (string)$address;
+        $this->port = (int)$port;
         $this->startMessage = $startMessage;
     }
 
@@ -124,5 +126,21 @@ class RemoteEventServerPlugin extends AbstractPlugin implements TriggerPluginInt
             socket_close($this->msgsock);
         if($this->sock)
             socket_close($this->sock);
+    }
+
+    /**
+     * @return int
+     */
+    public function getPort(): int
+    {
+        return $this->port;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAddress(): string
+    {
+        return $this->address;
     }
 }
