@@ -61,4 +61,14 @@ interface PluginManagementInterface
      * @return null|DispatchedEventResponseInterface
      */
     public function requestDispatchedResponse();
+
+    /**
+     * Calling this method sends a stop signal to the main sps process and it will terminate.
+     * If the main sps will execute the stop command, this method returns true otherwise the sps won't stop
+     *
+     * @param int $code
+     * @param string $reason
+     * @return bool
+     */
+    public function stopEngine($code = 0, $reason = ""): bool;
 }
