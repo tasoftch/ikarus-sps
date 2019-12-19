@@ -37,7 +37,7 @@ namespace Ikarus\SPS\Plugin\Error;
 
 use Ikarus\SPS\Plugin\PluginManagementInterface;
 
-class IgnoreErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
+class DispatchedIgnoreErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
 {
     protected function handleError(ErrorInterface $error, PluginManagementInterface $management): bool
     {

@@ -40,8 +40,8 @@
  */
 
 use Ikarus\SPS\Engine;
-use Ikarus\SPS\Plugin\Error\FileLoggerErrorHandlerPlugin;
-use Ikarus\SPS\Plugin\Error\IgnoreErrorHandlerPlugin;
+use Ikarus\SPS\Plugin\Error\DispatchedFileLoggerErrorHandlerPlugin;
+use Ikarus\SPS\Plugin\Error\DispatchedIgnoreErrorHandlerPlugin;
 use Ikarus\SPS\Plugin\Trigger\CallbackTriggerPlugin;
 use PHPUnit\Framework\TestCase;
 
@@ -64,7 +64,7 @@ class ErrorHandlingTest extends TestCase
 
     public function testIgnoreErrorHandling() {
         $engine = new Engine();
-        $engine->addPlugin( new IgnoreErrorHandlerPlugin() );
+        $engine->addPlugin( new DispatchedIgnoreErrorHandlerPlugin() );
 
         $engine->addPlugin( new CallbackTriggerPlugin(function() {
             trigger_error("Warning", E_USER_WARNING);
@@ -80,7 +80,7 @@ class ErrorHandlingTest extends TestCase
 
     public function testFileLogger() {
         $engine = new Engine();
-        $engine->addPlugin( new FileLoggerErrorHandlerPlugin('Tests/test.log') );
+        $engine->addPlugin( new DispatchedFileLoggerErrorHandlerPlugin('Tests/test.log') );
 
         $engine->addPlugin( new CallbackTriggerPlugin(function() {
             trigger_error("Warning", E_USER_WARNING);

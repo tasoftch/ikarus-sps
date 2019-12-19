@@ -38,7 +38,7 @@ namespace Ikarus\SPS\Plugin\Error;
 use DateTime;
 use Ikarus\SPS\Plugin\PluginManagementInterface;
 
-class FileLoggerErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
+class DispatchedFileLoggerErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
 {
     private $filename;
 
