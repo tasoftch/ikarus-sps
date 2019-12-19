@@ -40,6 +40,7 @@ use Ikarus\SPS\Event\DispatchedEventResponseInterface;
 use Ikarus\SPS\Event\StopEngineEvent;
 use Ikarus\SPS\Helper\PluginManager;
 use Ikarus\SPS\Helper\ProcessManager;
+use Ikarus\SPS\Plugin\DispatchedErrorHandlerPluginInterface;
 use Ikarus\SPS\Plugin\Listener\ListenerPluginInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
 use Ikarus\SPS\Plugin\TearDownPluginInterface;
@@ -66,6 +67,9 @@ class Engine implements EngineInterface
     /** @var PriorityCollection */
     protected $plugins;
 
+    /** @var PriorityCollection */
+    protected $errorPlugins;
+
     /** @var callable|null */
     protected $cleanUpHandler;
 
@@ -83,6 +87,8 @@ class Engine implements EngineInterface
         $this->processManager = new ProcessManager();
 
         $this->plugins = new PriorityCollection();
+        $this->errorPlugins = new PriorityCollection();
+
         $this->name = $name;
     }
 
@@ -105,8 +111,12 @@ class Engine implements EngineInterface
         if($this->isRunning())
             return false;
 
-        if(!$this->plugins->contains($plugin))
+        if(!$this->plugins->contains($plugin)) {
             $this->plugins->add($priority, $plugin);
+            if($plugin instanceof DispatchedErrorHandlerPluginInterface)
+                $this->errorPlugins->add($priority, $plugin);
+        }
+
         return true;
     }
 
@@ -118,6 +128,7 @@ class Engine implements EngineInterface
         if($this->isRunning())
             return false;
         $this->plugins->remove($plugin);
+        $this->errorPlugins->remove($plugin);
         return true;
     }
 
@@ -197,11 +208,21 @@ class Engine implements EngineInterface
      * Internal call to setup engine
      */
     protected function setupEngine() {
+        $setupErrorEnv = function() {
+            foreach($this->errorPlugins->getOrderedElements() as $plugin) {
+                if($plugin instanceof DispatchedErrorHandlerPluginInterface) {
+                    $plugin->setupErrorEnvironment( $this->pluginManager );
+                }
+            }
+        };
+
         foreach ($this->plugins->getOrderedElements() as $plugin) {
             if($plugin instanceof TriggerPluginInterface) {
                 $this->processManager->fork($plugin);
                 if(!$this->processManager->isMainProcess()) {
                     // Child process
+                    usleep(1000);
+                    $setupErrorEnv();
                     $plugin->run( $this->pluginManager );
                     exit();
                 }
