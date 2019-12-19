@@ -40,8 +40,15 @@
  */
 
 use Ikarus\SPS\Engine;
+use Ikarus\SPS\Event\PluginErrorEvent;
+use Ikarus\SPS\Plugin\Error\Deprecated;
+use Ikarus\SPS\Plugin\Error\DispatchedEventTriggerErrorHandlerPlugin;
 use Ikarus\SPS\Plugin\Error\DispatchedFileLoggerErrorHandlerPlugin;
 use Ikarus\SPS\Plugin\Error\DispatchedIgnoreErrorHandlerPlugin;
+use Ikarus\SPS\Plugin\Error\Fatal;
+use Ikarus\SPS\Plugin\Error\Notice;
+use Ikarus\SPS\Plugin\Error\Warning;
+use Ikarus\SPS\Plugin\Listener\CallbackListenerPlugin;
 use Ikarus\SPS\Plugin\Trigger\CallbackTriggerPlugin;
 use PHPUnit\Framework\TestCase;
 
@@ -97,5 +104,71 @@ class ErrorHandlingTest extends TestCase
         $this->assertFileExists('Tests/test.log');
 
         $this->assertCount( 4, file('Tests/test.log') );
+    }
+
+    public function testEventTriggerPluginWithoutListeners() {
+        $engine = new Engine();
+        $engine->addPlugin( new DispatchedEventTriggerErrorHandlerPlugin() );
+
+        $engine->addPlugin( new CallbackTriggerPlugin(function() {
+            trigger_error("Warning", E_USER_WARNING);
+            trigger_error("Notice", E_USER_NOTICE);
+            trigger_error("Deprecated", E_USER_DEPRECATED);
+            trigger_error("Error", E_USER_ERROR);
+        }) );
+
+        $this->startTimer();
+        $engine->run();
+        $this->assertBetween(0, 0.1, $this->stopTimer());
+    }
+
+    public function testEventTriggerPluginWithListener() {
+        $engine = new Engine();
+        $engine->addPlugin( new DispatchedEventTriggerErrorHandlerPlugin() );
+
+        $engine->addPlugin( new CallbackTriggerPlugin(function() {
+            trigger_error("Warning", E_USER_WARNING);
+            trigger_error("Notice", E_USER_NOTICE);
+            trigger_error("Deprecated", E_USER_DEPRECATED);
+            trigger_error("Error", E_USER_ERROR);
+        }) );
+
+        $engine->addPlugin( new CallbackListenerPlugin(function($name, PluginErrorEvent $event) use (&$classes, &$messages, &$codes, &$files) {
+            $err = $event->getError();
+
+            $classes[] = get_class($err);
+            $messages[] = $err->getMessage();
+            $codes[] = $err->getCode();
+            $files[] = $err->getFile();
+
+            // Stopping propagation will cause that the plugin shuts down, but the engine will continue.
+            // So its up to the listeners to stop the engine
+            // $event->stopPropagation();
+        }, ["ERR.WARNING", 'ERR.NOTICE', 'ERR.DEPRECATED', 'ERR.FATAL', 'ERR.EXCEPTION', 'ERR.ERROR']));
+
+        $this->startTimer();
+        $engine->run();
+        $this->assertBetween(0, 0.1, $this->stopTimer());
+
+        $this->assertEquals([
+            Warning::class,
+            Notice::class,
+            Deprecated::class,
+            Fatal::class
+        ], $classes);
+
+        $this->assertEquals([
+            'Warning',
+            "Notice",
+            "Deprecated",
+            "Error"
+        ], $messages);
+
+        $this->assertEquals([
+            E_USER_WARNING,
+            E_USER_NOTICE,
+            E_USER_DEPRECATED,
+            E_USER_ERROR
+        ], $codes);
     }
 }
