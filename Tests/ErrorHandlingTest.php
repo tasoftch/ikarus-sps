@@ -40,6 +40,7 @@
  */
 
 use Ikarus\SPS\Engine;
+use Ikarus\SPS\Plugin\Error\FileLoggerErrorHandlerPlugin;
 use Ikarus\SPS\Plugin\Error\IgnoreErrorHandlerPlugin;
 use Ikarus\SPS\Plugin\Trigger\CallbackTriggerPlugin;
 use PHPUnit\Framework\TestCase;
@@ -78,6 +79,23 @@ class ErrorHandlingTest extends TestCase
     }
 
     public function testErrorTrigger() {
+        $engine = new Engine();
+        $engine->addPlugin( new FileLoggerErrorHandlerPlugin('Tests/test.log') );
 
+        $engine->addPlugin( new CallbackTriggerPlugin(function() {
+            trigger_error("Warning", E_USER_WARNING);
+            trigger_error("Notice", E_USER_NOTICE);
+            trigger_error("Deprecated", E_USER_DEPRECATED);
+            trigger_error("Error", E_USER_ERROR);
+        }) );
+
+        if(file_exists('Tests/test.log'))
+            unlink('Tests/test.log');
+
+        $engine->run();
+
+        $this->assertFileExists('Tests/test.log');
+
+        $this->assertCount( 4, file('Tests/test.log') );
     }
 }

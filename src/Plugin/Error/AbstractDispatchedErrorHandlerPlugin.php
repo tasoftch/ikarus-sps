@@ -69,7 +69,9 @@ abstract class AbstractDispatchedErrorHandlerPlugin extends AbstractPlugin imple
      * @param PluginManagementInterface $management
      * @return bool
      */
-    abstract protected function handleError(ErrorInterface $error, PluginManagementInterface $management): bool;
+    protected function handleError(ErrorInterface $error, PluginManagementInterface $management): bool {
+        return $error instanceof Fatal ? false : true;
+    }
 
     /**
      * @inheritDoc
