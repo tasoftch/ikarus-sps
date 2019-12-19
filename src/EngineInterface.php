@@ -32,38 +32,37 @@
  *
  */
 
+namespace Ikarus\SPS;
+
 /**
- * ErrorManagerTest.php
- * ikarus-sps
+ * The Ikarus SPS Engine dispatches the plugins to separate processes (if needed) and handle a common gateway to let all plugins communicate between each other.
+ * When the SPS Engine runs, it is controlling a machine or what ever.
  *
- * Created on 2019-12-07 17:31 by thomas
+ * @package Ikarus\SPS
  */
-
-use Ikarus\SPS\Helper\ErrorManager;
-use PHPUnit\Framework\TestCase;
-
-class ErrorManagerTest extends TestCase
+interface EngineInterface
 {
     /**
-     * @expectedException Ikarus\SPS\Exception\RuntimeFatalErrorException
+     * Gets all plugins to run
+     *
+     * @return array
      */
-    public function testManager() {
-        $em = new ErrorManager();
-
-        $em->prepareEnvironment();
-        trigger_error("Test", E_USER_NOTICE);
-        trigger_error("Test", E_USER_WARNING);
-        trigger_error("Test", E_USER_DEPRECATED);
-        trigger_error("Test", E_USER_ERROR);
-    }
+    public function getPlugins(): array;
 
     /**
-     * @expectedException RuntimeException
+     * Runs the engine
      */
-    public function testException() {
-        $em = new ErrorManager();
+    public function run();
 
-        $em->prepareEnvironment();
-        throw new RuntimeException("Test");
-    }
+    /**
+     * Returns true, if the engine is running
+     *
+     * @return bool
+     */
+    public function isRunning(): bool;
+
+    /**
+     * Stops the engine
+     */
+    public function stop();
 }
