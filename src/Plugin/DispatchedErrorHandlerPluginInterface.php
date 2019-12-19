@@ -34,11 +34,18 @@
 
 namespace Ikarus\SPS\Plugin;
 
-
-abstract class AbstractPlugin implements PluginInterface
+/**
+ * Error handler plugins are special plugins. They are not dispatched as trigger and also not registered as listener.
+ * But an error handler plugin is invoked before each dispatched trigger plugin to handle errors in child process.
+ *
+ * @package Ikarus\SPS\Plugin
+ */
+interface DispatchedErrorHandlerPluginInterface extends PluginInterface
 {
-    public function getIdentifier(): string
-    {
-        return get_class($this);
-    }
+    /**
+     * This method gets called before each dispatched trigger plugin.
+     *
+     * @param PluginManagementInterface $management
+     */
+    public function setupErrorEnvironment(PluginManagementInterface $management);
 }
