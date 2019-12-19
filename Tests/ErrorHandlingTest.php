@@ -78,7 +78,7 @@ class ErrorHandlingTest extends TestCase
         $this->assertBetween(0, 0.1, $this->stopTimer());
     }
 
-    public function testErrorTrigger() {
+    public function testFileLogger() {
         $engine = new Engine();
         $engine->addPlugin( new FileLoggerErrorHandlerPlugin('Tests/test.log') );
 
