@@ -39,6 +39,7 @@ use Ikarus\SPS\Plugin\AbstractPlugin;
 use Ikarus\SPS\Plugin\PluginManagementInterface;
 use Ikarus\SPS\Plugin\TearDownPluginInterface;
 use Ikarus\SPS\Event\ResponseEvent;
+use TASoft\Util\Pipe\PipeInterface;
 
 class RemoteEventServerPlugin extends AbstractPlugin implements TriggerPluginInterface, TearDownPluginInterface
 {
@@ -61,13 +62,12 @@ class RemoteEventServerPlugin extends AbstractPlugin implements TriggerPluginInt
      */
     public function __construct($address, $port, $startMessage = 'Welcome to Remote Event Server of Ikarus SPS!')
     {
-        parent::__construct("");
         $this->address = (string)$address;
         $this->port = (int)$port;
         $this->startMessage = $startMessage;
     }
 
-    public function run(PluginManagementInterface $manager)
+    public function run(PluginManagementInterface $manager, $pipe = NULL)
     {
         if (($this->sock = $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
             trigger_error( "socket_create() failed: " . socket_strerror(socket_last_error()), E_USER_WARNING);
@@ -75,6 +75,12 @@ class RemoteEventServerPlugin extends AbstractPlugin implements TriggerPluginInt
 
         if (socket_bind($sock, $this->address, $this->port) === false) {
             trigger_error( "socket_bind() failed: " . socket_strerror(socket_last_error($sock)), E_USER_WARNING);
+        }
+
+        socket_getsockname($sock, $name, $port);
+
+        if($pipe instanceof PipeInterface) {
+            $pipe->sendData(['host'=>$name, 'port'=>$port]);
         }
 
         if (socket_listen($sock, 5) === false) {
@@ -104,13 +110,12 @@ class RemoteEventServerPlugin extends AbstractPlugin implements TriggerPluginInt
                     continue;
                 }
 
-
                 $buf = preg_split("/\s+/i", $buf);
                 $cmd = array_shift($buf);
 
                 $manager->dispatchEvent( strtoupper($cmd), new ResponseEvent("Command $cmd not found"), ...$buf );
                 $response = $manager->requestDispatchedResponse()->getResponse();
-
+                
                 socket_write ($msgsock, $response, strlen ($response));
             } while (true);
             socket_close ($msgsock);

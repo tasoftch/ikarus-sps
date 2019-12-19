@@ -34,71 +34,38 @@
 
 namespace Ikarus\SPS\Plugin\Trigger;
 
+
+use DateTime;
+use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Plugin\PluginManagementInterface;
 
-class TimerPlugin extends AbstractEventTriggerPlugin
+class StopEngineAtDatePlugin extends AbstractEventTriggerPlugin
 {
-    private $interval;
-    private $times;
+    /** @var DateTime */
+    private $date;
 
-    /**
-     * TimerPlugin constructor.
-     * @param float $interval
-     * @param int $times
-     * @param string $eventName
-     */
-    public function __construct($interval, $times = 0, $eventName = "")
+    public function __construct(DateTime $date, $eventName = "QUIT")
     {
         parent::__construct($eventName);
-        $this->interval = $interval;
-        $this->times = $times;
+        $this->date = $date;
     }
-
 
     public function run(PluginManagementInterface $manager)
     {
-        $count = 0;
-        while (1) {
-            $count++;
+        $dd = ($this->date->getTimestamp() + ($this->date->format("u") / 1e6)) - microtime(true);
+        if($dd <= 0)
+            throw new SPSException("Date must be in future");
 
-            if($this->getTimes() > 0 AND $this->getTimes() < $count)
-                break;
-
-            usleep( $this->getInterval() * 1000000 );
-            $manager->dispatchEvent($this->getEventName());
-        }
+        usleep($dd * 1e6);
+        $manager->dispatchEvent( $this->getEventName() );
     }
 
     /**
-     * @return float
+     * @return DateTime
      */
-    public function getInterval()
+    public function getDate(): DateTime
     {
-        return $this->interval;
-    }
-
-    /**
-     * @param float $interval
-     */
-    public function setInterval($interval)
-    {
-        $this->interval = $interval;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTimes()
-    {
-        return $this->times;
-    }
-
-    /**
-     * @param int $times
-     */
-    public function setTimes($times)
-    {
-        $this->times = $times;
+        return $this->date;
     }
 
 }

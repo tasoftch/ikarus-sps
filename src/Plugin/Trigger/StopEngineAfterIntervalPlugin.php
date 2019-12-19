@@ -34,11 +34,9 @@
 
 namespace Ikarus\SPS\Plugin\Trigger;
 
-
-use Ikarus\SPS\Plugin\AbstractPlugin;
 use Ikarus\SPS\Plugin\PluginManagementInterface;
 
-class StopEnginePlugin extends AbstractPlugin implements TriggerPluginInterface
+class StopEngineAfterIntervalPlugin extends AbstractEventTriggerPlugin
 {
     private $interval;
 
