@@ -97,7 +97,9 @@ abstract class AbstractDispatchedErrorHandlerPlugin extends AbstractPlugin imple
 
                 return Fatal::class;
             })();
-            return $this->handleError( new $c($code, $msg, $file, $line), $management );
+            $bool = $this->handleError( new $c($code, $msg, $file, $line), $management );
+            usleep(10000);
+            return $bool;
         }, $this->getErrorReporting());
 
         set_exception_handler(function(Throwable $throwable) use ($management) {
