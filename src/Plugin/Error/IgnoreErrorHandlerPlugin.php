@@ -41,8 +41,6 @@ class IgnoreErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
 {
     protected function handleError(ErrorInterface $error, PluginManagementInterface $management): bool
     {
-        if($error instanceof Fatal)
-            return $management->stopEngine( $error->getCode(), $error->getMessage() );
-        return true;
+        return $error instanceof Fatal ? false : true;
     }
 }

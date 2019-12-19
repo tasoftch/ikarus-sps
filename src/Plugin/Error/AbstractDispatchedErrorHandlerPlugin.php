@@ -77,6 +77,8 @@ abstract class AbstractDispatchedErrorHandlerPlugin extends AbstractPlugin imple
     public function setupErrorEnvironment(PluginManagementInterface $management)
     {
         set_error_handler(function($code, $msg, $file, $line) use ($management) {
+            $bool = false;
+
             $c = (function() use ($code) {
                 switch ($code) {
                     case E_WARNING:
@@ -97,10 +99,20 @@ abstract class AbstractDispatchedErrorHandlerPlugin extends AbstractPlugin imple
 
                 return Fatal::class;
             })();
-            $bool = $this->handleError( new $c($code, $msg, $file, $line), $management );
-            usleep(10000);
-            return $bool;
-        }, $this->getErrorReporting());
+
+            if($this->getErrorReporting() & $code) {
+                $bool = $this->handleError( new $c($code, $msg, $file, $line), $management );
+            }
+
+            if(!$bool) {
+                if($c == Fatal::class) {
+                    $management->stopEngine($code, $msg);
+                    usleep(10000);
+                    exit();
+                }
+            }
+            return true;
+        });
 
         set_exception_handler(function(Throwable $throwable) use ($management) {
             return $this->handleError( new Exception($throwable->getCode(), $throwable->getMessage(), $throwable->getFile(), $throwable->getLine()), $management );
