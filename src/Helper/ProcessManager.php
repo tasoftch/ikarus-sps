@@ -93,7 +93,7 @@ class ProcessManager
             throw new SPSException("Can not get process ID from child process context");
 
         if(($idx = array_search($plugin, $this->processes)) !== false) {
-            if(posix_kill($idx, SIGINT)) {
+            if(posix_kill($idx, SIGTERM)) {
                 unset($this->processes[$idx]);
             } else {
                 throw new SPSException("Can not get process ID from child process context");
@@ -105,8 +105,10 @@ class ProcessManager
      * Stops all processes of the triggers
      */
     public function killAll() {
-        foreach($this->processes as $pid => $plugin)
-            posix_kill($pid, SIGINT);
+        foreach($this->processes as $pid => $plugin) {
+            posix_kill($pid, SIGTERM);
+        }
+        $this->processes = [];
     }
 
     /**

@@ -34,9 +34,10 @@
 
 namespace Ikarus\SPS\Helper;
 
-
 use Ikarus\SPS\Event\DispatchedEventInterface;
 use Ikarus\SPS\Event\DispatchedEventResponseInterface;
+use Ikarus\SPS\Event\ResponseEvent;
+use Ikarus\SPS\Event\StopEngineEvent;
 use Ikarus\SPS\Plugin\PluginManagementInterface;
 use TASoft\Util\Pipe;
 
@@ -102,5 +103,19 @@ class PluginManager implements PluginManagementInterface
                 return $response;
         }
         return NULL;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function stopEngine($code = 0, $reason = ""): bool
+    {
+        $this->dispatchEvent("", new StopEngineEvent($reason, $code));
+        if($resp = $this->requestDispatchedResponse()) {
+            if($resp instanceof ResponseEvent) {
+                return $resp->isPropagationStopped();
+            }
+        }
+        return false;
     }
 }
