@@ -36,12 +36,90 @@
  * EngineTest.php
  * ikarus-sps
  *
- * Created on 2019-12-07 23:55 by thomas
+ * Created on 2019-12-19 11:22 by thomas
  */
 
+use Ikarus\SPS\Engine;
+use Ikarus\SPS\Plugin\Listener\CallbackListenerPlugin;
+use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Trigger\CallbackTriggerPlugin;
+use Ikarus\SPS\Plugin\Trigger\StopEngineAfterIntervalPlugin;
+use Ikarus\SPS\Plugin\Trigger\StopEngineAtDatePlugin;
 use PHPUnit\Framework\TestCase;
 
 class EngineTest extends TestCase
 {
+    private $timer;
 
+    protected function startTimer() {
+        $this->timer = microtime(true);
+    }
+
+    protected function assertBetween($min, $max, $actual) {
+        $this->assertGreaterThan($min, $actual);
+        $this->assertLessThan($max, $actual);
+    }
+
+    protected function stopTimer() {
+        return microtime(true) - $this->timer;
+    }
+
+    public function testEnginePluginRegistration() {
+        $engine = new Engine("Ikarus");
+        $this->assertEquals("Ikarus", $engine->getName());
+
+        $this->assertTrue( $engine->addPlugin($p1 = new CallbackTriggerPlugin(function() {
+
+        }), 13 ));
+
+        $this->assertTrue( $engine->addPlugin($p2 = new CallbackListenerPlugin(function($evtName, $evt) {
+
+        }, ["EVENT.NAME"]), 3) );
+
+        $this->assertSame([$p2, $p1], $engine->getPlugins());
+
+        $engine->removePlugin( $p1 );
+        $this->assertSame([$p2], $engine->getPlugins());
+    }
+
+    public function testRunAndStop() {
+        $engine = new Engine();
+        $engine->addPlugin( new CallbackTriggerPlugin(function(PluginManagementInterface $management) {
+            usleep(10000);
+            $management->stopEngine(13, "Error");
+        }) );
+
+        $this->assertEquals(13, $engine->run());
+        $this->assertEquals("Error", $engine->getExitReason());
+    }
+
+    public function testAutoStopAfterInterval() {
+        $engine = new Engine();
+        $engine->addPlugin( new StopEngineAfterIntervalPlugin(0.3) );
+
+        $this->startTimer();
+        $engine->run();
+        $this->assertBetween(0.3, 0.31, $this->stopTimer());
+    }
+
+    public function testAutoStopAtDate() {
+        $engine = new Engine();
+        $engine->addPlugin( new StopEngineAtDatePlugin( $d = new DateTime("now +1second") ) );
+        $this->startTimer();
+        $this->assertEquals(0, $engine->run());
+        $this->assertBetween(1.0, 1.1, $this->stopTimer());
+    }
+
+    public function testCleanupHandler() {
+        $engine = new Engine();
+        $engine->addPlugin( new CallbackTriggerPlugin( function(PluginManagementInterface $management) {
+            $management->stopEngine(1, 'Hehe');
+        } ) );
+
+        $reached = false;
+        $engine->setCleanUpHandler( function() use (&$reached) { $reached = true; } );
+        $engine->run();
+
+        $this->assertTrue( $reached );
+    }
 }

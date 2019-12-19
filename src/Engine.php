@@ -35,18 +35,20 @@
 namespace Ikarus\SPS;
 
 
+use Ikarus\SPS\Event\DispatchedEvent;
 use Ikarus\SPS\Event\DispatchedEventResponseInterface;
-use Ikarus\SPS\Helper\ErrorManager;
+use Ikarus\SPS\Event\StopEngineEvent;
 use Ikarus\SPS\Helper\PluginManager;
 use Ikarus\SPS\Helper\ProcessManager;
 use Ikarus\SPS\Plugin\Listener\ListenerPluginInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
+use Ikarus\SPS\Plugin\TearDownPluginInterface;
 use Ikarus\SPS\Plugin\Trigger\TriggerPluginInterface;
 use TASoft\Collection\PriorityCollection;
 use TASoft\EventManager\EventManager;
 use Throwable;
 
-class Engine
+class Engine implements EngineInterface
 {
     /** @var EventManager */
     protected $eventManager;
@@ -54,12 +56,12 @@ class Engine
     protected $pluginManager;
     /** @var ProcessManager */
     protected $processManager;
-    /** @var ErrorManager */
-    protected $errorManager;
     /** @var string  */
     private $name;
     /** @var bool  */
     protected $running = false;
+
+    protected $exitReason = "";
 
     /** @var PriorityCollection */
     protected $plugins;
@@ -79,7 +81,6 @@ class Engine
         $this->eventManager = new EventManager();
         $this->pluginManager = new PluginManager();
         $this->processManager = new ProcessManager();
-        $this->errorManager = new ErrorManager();
 
         $this->plugins = new PriorityCollection();
         $this->name = $name;
@@ -121,7 +122,7 @@ class Engine
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
     public function isRunning(): bool
     {
@@ -129,9 +130,7 @@ class Engine
     }
 
     /**
-     * Runs the engine and waits for SPS triggers
-     *
-     * @throws Throwable
+     * @inheritDoc
      */
     public function run() {
         if($this->processManager->isMainProcess()) {
@@ -139,7 +138,20 @@ class Engine
             $this->setupEngine();
 
             try {
+                $this->exitReason = "";
+                $this->eventManager->trigger("INIT", new DispatchedEvent());
+
                 while ( $this->pluginManager->trapEvent($name, $event, $arguments) ) {
+                    if($event instanceof StopEngineEvent) {
+                        $this->exitReason = $event->getResponse();
+                        $event->stopPropagation();
+                        $this->pluginManager->postResponse($event);
+
+                        return $event->getCode();
+                    }
+                    if(!$event)
+                        $event = new DispatchedEvent();
+
                     $code = $this->willHandleDispatchedEvent($name, $event, $arguments);
                     if($code == static::RUNLOOP_STOP_ENGINE)
                         break;
@@ -158,13 +170,15 @@ class Engine
                         $this->pluginManager->postResponse($event);
                     }
                 }
-            } catch (Throwable $throwable) {
+            }
+            catch (Throwable $throwable) {
                 throw $throwable;
             } finally {
                 $this->stop();
             }
         } else
             trigger_error("Can only run from main process", E_USER_WARNING);
+        return 0;
     }
 
     /**
@@ -183,8 +197,6 @@ class Engine
      * Internal call to setup engine
      */
     protected function setupEngine() {
-        $this->errorManager->prepareEnvironment();
-
         foreach ($this->plugins->getOrderedElements() as $plugin) {
             if($plugin instanceof TriggerPluginInterface) {
                 $this->processManager->fork($plugin);
@@ -207,6 +219,11 @@ class Engine
      * Internal call to tear down engine
      */
     protected function tearDownEngine() {
+        foreach($this->getPlugins() as $plugin) {
+            if($plugin instanceof TearDownPluginInterface)
+                $plugin->tearDown();
+        }
+
         $this->processManager->killAll();
         $this->processManager->waitForAll();
 
@@ -214,8 +231,6 @@ class Engine
 
         if(is_callable($cb = $this->getCleanUpHandler()))
             call_user_func($cb);
-
-        $this->errorManager->restoreEnvironment();
     }
 
     /**
@@ -259,5 +274,20 @@ class Engine
     public function setCleanUpHandler($cleanUpHandler)
     {
         $this->cleanUpHandler = $cleanUpHandler;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPlugins(): array {
+        return $this->plugins->getOrderedElements();
+    }
+
+    /**
+     * @return string
+     */
+    public function getExitReason(): string
+    {
+        return $this->exitReason;
     }
 }
