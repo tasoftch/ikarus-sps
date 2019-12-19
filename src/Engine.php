@@ -243,6 +243,9 @@ class Engine implements EngineInterface
         foreach($this->getPlugins() as $plugin) {
             if($plugin instanceof TearDownPluginInterface)
                 $plugin->tearDown();
+            if($plugin instanceof ListenerPluginInterface) {
+                $this->eventManager->removeListener($plugin);
+            }
         }
 
         $this->processManager->killAll();
