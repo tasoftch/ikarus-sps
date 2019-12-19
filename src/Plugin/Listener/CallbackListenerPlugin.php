@@ -35,34 +35,29 @@
 namespace Ikarus\SPS\Plugin\Listener;
 
 
-use Ikarus\SPS\Plugin\AbstractPlugin;
+use Ikarus\SPS\Event\DispatchedEventInterface;
 
-abstract class AbstractListenerPlugin extends AbstractPlugin implements ListenerPluginInterface
+class CallbackListenerPlugin extends AbstractListenerPlugin
 {
-    protected $events;
+    /** @var callable */
+    private $callback;
 
-    /**
-     * AbstractTriggerPlugin constructor.
-     * @param array $eventNames
-     */
-    public function __construct(array $eventNames)
+    public function __construct(callable $callback, array $eventNames)
     {
-        $this->events = $eventNames;
+        parent::__construct($eventNames);
+        $this->callback = $callback;
+    }
+
+    public function __invoke(string $eventName, DispatchedEventInterface $event, $eventManager, ...$arguments)
+    {
+        call_user_func($this->getCallback(), $eventName, $event, $eventManager, ...$arguments);
     }
 
     /**
-     * @inheritDoc
+     * @return callable
      */
-    public function getEventNames(): array
+    public function getCallback(): callable
     {
-        return $this->events;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getIdentifier(): string
-    {
-        return get_class($this);
+        return $this->callback;
     }
 }
