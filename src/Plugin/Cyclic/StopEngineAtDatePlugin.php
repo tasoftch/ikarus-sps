@@ -32,35 +32,39 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS\Plugin\Cyclic;
 
 
-use DateTime;
-use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 
-class DispatchedFileLoggerErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
+class StopEngineAtDatePlugin extends AbstractCyclicPlugin
 {
-    private $filename;
+    /** @var \DateTime */
+    private $date;
 
-    public function __construct($filename = NULL, $error_reporting = E_ALL)
+    /**
+     * StopEngineAtDatePlugin constructor.
+     * @param \DateTime $date
+     */
+    public function __construct(\DateTime $date)
     {
-        parent::__construct($error_reporting);
-        $this->filename = NULL === $filename ? (ini_get("error_log") ?? 'error_log') : $filename;
+        $this->date = $date;
+    }
+
+
+    public function update(CyclicPluginManagementInterface $pluginManagement)
+    {
+        $dd = ($this->date->getTimestamp() + ($this->date->format("u") / 1e6)) - microtime(true);
+        if($dd <= 0)
+            $pluginManagement->stopEngine();
     }
 
     /**
-     * @return string
+     * @return \DateTime
      */
-    public function getFilename(): string
+    public function getDate(): \DateTime
     {
-        return $this->filename;
+        return $this->date;
     }
 
-    protected function handleError(ErrorInterface $error, TriggeredPluginManagementInterface $management): bool
-    {
-        $f = fopen($this->getFilename(), 'a');
-        fwrite($f, sprintf("[IKARUS %s]: %s at %s on line %d" . PHP_EOL, (new DateTime())->format("Y-m-d G:i:s.u"), $error->getMessage(), $error->getFile(), $error->getLine()));
-        fclose($f);
-        return parent::handleError($error, $management);
-    }
 }

@@ -36,7 +36,7 @@ namespace Ikarus\SPS\Plugin\Trigger;
 
 
 use Ikarus\SPS\Plugin\AbstractPlugin;
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 use Ikarus\SPS\Plugin\TearDownPluginInterface;
 use Ikarus\SPS\Event\ResponseEvent;
 use TASoft\Util\Pipe\PipeInterface;
@@ -67,7 +67,7 @@ class RemoteEventServerPlugin extends AbstractPlugin implements TriggerPluginInt
         $this->startMessage = $startMessage;
     }
 
-    public function run(PluginManagementInterface $manager, $pipe = NULL)
+    public function run(TriggeredPluginManagementInterface $manager, $pipe = NULL)
     {
         if (($this->sock = $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
             trigger_error( "socket_create() failed: " . socket_strerror(socket_last_error()), E_USER_WARNING);

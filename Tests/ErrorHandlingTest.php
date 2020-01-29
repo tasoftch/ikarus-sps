@@ -39,7 +39,6 @@
  * Created on 2019-12-19 13:11 by thomas
  */
 
-use Ikarus\SPS\Engine;
 use Ikarus\SPS\Event\PluginErrorEvent;
 use Ikarus\SPS\Plugin\Error\Deprecated;
 use Ikarus\SPS\Plugin\Error\DispatchedEventTriggerErrorHandlerPlugin;
@@ -50,6 +49,7 @@ use Ikarus\SPS\Plugin\Error\Notice;
 use Ikarus\SPS\Plugin\Error\Warning;
 use Ikarus\SPS\Plugin\Listener\CallbackListenerPlugin;
 use Ikarus\SPS\Plugin\Trigger\CallbackTriggerPlugin;
+use Ikarus\SPS\TriggeredEngine;
 use PHPUnit\Framework\TestCase;
 
 class ErrorHandlingTest extends TestCase
@@ -70,7 +70,7 @@ class ErrorHandlingTest extends TestCase
     }
 
     public function testIgnoreErrorHandling() {
-        $engine = new Engine();
+        $engine = new TriggeredEngine();
         $engine->addPlugin( new DispatchedIgnoreErrorHandlerPlugin() );
 
         $engine->addPlugin( new CallbackTriggerPlugin(function() {
@@ -86,7 +86,7 @@ class ErrorHandlingTest extends TestCase
     }
 
     public function testFileLogger() {
-        $engine = new Engine();
+        $engine = new TriggeredEngine();
         $engine->addPlugin( new DispatchedFileLoggerErrorHandlerPlugin('Tests/test.log') );
 
         $engine->addPlugin( new CallbackTriggerPlugin(function() {
@@ -107,7 +107,7 @@ class ErrorHandlingTest extends TestCase
     }
 
     public function testEventTriggerPluginWithoutListeners() {
-        $engine = new Engine();
+        $engine = new TriggeredEngine();
         $engine->addPlugin( new DispatchedEventTriggerErrorHandlerPlugin() );
 
         $engine->addPlugin( new CallbackTriggerPlugin(function() {
@@ -123,7 +123,7 @@ class ErrorHandlingTest extends TestCase
     }
 
     public function testEventTriggerPluginWithListener() {
-        $engine = new Engine();
+        $engine = new TriggeredEngine();
         $engine->addPlugin( new DispatchedEventTriggerErrorHandlerPlugin() );
 
         $engine->addPlugin( new CallbackTriggerPlugin(function() {

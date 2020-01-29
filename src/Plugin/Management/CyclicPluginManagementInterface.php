@@ -32,35 +32,28 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS\Plugin\Management;
 
 
-use DateTime;
-use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
-
-class DispatchedFileLoggerErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
+interface CyclicPluginManagementInterface extends PluginManagementInterface
 {
-    private $filename;
-
-    public function __construct($filename = NULL, $error_reporting = E_ALL)
-    {
-        parent::__construct($error_reporting);
-        $this->filename = NULL === $filename ? (ini_get("error_log") ?? 'error_log') : $filename;
-    }
+    /**
+     * Gets the update frequency in Hz, so 1 means once every second, 50 means 50 times per second.
+     * PLEASE NOTE: The frequency does not include the runtime!
+     *
+     * @return int
+     */
+    public function getFrequency(): int;
 
     /**
-     * @return string
+     * This method can be called to change the frequency temporary for the next interval.
+     * So may be your sps run with a 4Hz frequency (interval of 0.25 seconds), but the plugin needs temporary a faster update,
+     * it can require a higher frequency.
+     *
+     * Passing NULL resets the frequency to the engine's default.
+     *
+     * @param int|null $otherFrequency
+     * @return bool
      */
-    public function getFilename(): string
-    {
-        return $this->filename;
-    }
-
-    protected function handleError(ErrorInterface $error, TriggeredPluginManagementInterface $management): bool
-    {
-        $f = fopen($this->getFilename(), 'a');
-        fwrite($f, sprintf("[IKARUS %s]: %s at %s on line %d" . PHP_EOL, (new DateTime())->format("Y-m-d G:i:s.u"), $error->getMessage(), $error->getFile(), $error->getLine()));
-        fclose($f);
-        return parent::handleError($error, $management);
-    }
+    public function requireTemporaryFrequency(int $otherFrequency = NULL): bool;
 }

@@ -34,7 +34,7 @@
 
 namespace Ikarus\SPS\Plugin\Trigger;
 
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 
 class StopEngineAfterIntervalPlugin extends AbstractEventTriggerPlugin
 {
@@ -54,7 +54,7 @@ class StopEngineAfterIntervalPlugin extends AbstractEventTriggerPlugin
     /**
      * @inheritDoc
      */
-    public function run(PluginManagementInterface $manager)
+    public function run(TriggeredPluginManagementInterface $manager)
     {
         usleep($this->getInterval() * 1000000);
         $manager->dispatchEvent( $this->getEventName() );

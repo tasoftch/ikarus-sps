@@ -35,11 +35,12 @@
 namespace Ikarus\SPS\Plugin\Error;
 
 
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 
 class DispatchedIgnoreErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
 {
-    protected function handleError(ErrorInterface $error, PluginManagementInterface $management): bool
+    protected function handleError(ErrorInterface $error, TriggeredPluginManagementInterface $management): bool
     {
         return $error instanceof Fatal ? false : true;
     }

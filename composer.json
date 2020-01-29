@@ -17,6 +17,7 @@
     "php": "^7.2",
     "tasoft/event-manager": "dev-master",
     "tasoft/process": "dev-master",
+    "tasoft/value-injector": "dev-master",
     "ext-sockets": "*",
     "ext-pcntl": "*",
     "ext-posix": "*"

@@ -32,35 +32,9 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS;
 
 
-use DateTime;
-use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
-
-class DispatchedFileLoggerErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
+interface TriggeredEngineInterface extends EngineInterface
 {
-    private $filename;
-
-    public function __construct($filename = NULL, $error_reporting = E_ALL)
-    {
-        parent::__construct($error_reporting);
-        $this->filename = NULL === $filename ? (ini_get("error_log") ?? 'error_log') : $filename;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFilename(): string
-    {
-        return $this->filename;
-    }
-
-    protected function handleError(ErrorInterface $error, TriggeredPluginManagementInterface $management): bool
-    {
-        $f = fopen($this->getFilename(), 'a');
-        fwrite($f, sprintf("[IKARUS %s]: %s at %s on line %d" . PHP_EOL, (new DateTime())->format("Y-m-d G:i:s.u"), $error->getMessage(), $error->getFile(), $error->getLine()));
-        fclose($f);
-        return parent::handleError($error, $management);
-    }
 }

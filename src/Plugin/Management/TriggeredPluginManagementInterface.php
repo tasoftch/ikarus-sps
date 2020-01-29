@@ -32,35 +32,29 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS\Plugin\Management;
 
 
-use DateTime;
-use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
+use Ikarus\SPS\Event\DispatchedEventInterface;
+use Ikarus\SPS\Event\DispatchedEventResponseInterface;
 
-class DispatchedFileLoggerErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
+interface TriggeredPluginManagementInterface extends PluginManagementInterface
 {
-    private $filename;
-
-    public function __construct($filename = NULL, $error_reporting = E_ALL)
-    {
-        parent::__construct($error_reporting);
-        $this->filename = NULL === $filename ? (ini_get("error_log") ?? 'error_log') : $filename;
-    }
+    /**
+     * SPS triggers may only use this method to trigger events!
+     *
+     * @param string $eventName
+     * @param $arguments
+     * @param DispatchedEventInterface|NULL $event
+     * @return void
+     */
+    public function dispatchEvent(string $eventName, DispatchedEventInterface $event = NULL, ...$arguments);
 
     /**
-     * @return string
+     * Call this event if the plugin expects a response of the last triggered event.
+     * Calling this method blocks the thread until a response is available. So to avoid unexpected blocking, dispatch an event that already implements DispatchedEventResponseInterface.
+     *
+     * @return null|DispatchedEventResponseInterface
      */
-    public function getFilename(): string
-    {
-        return $this->filename;
-    }
-
-    protected function handleError(ErrorInterface $error, TriggeredPluginManagementInterface $management): bool
-    {
-        $f = fopen($this->getFilename(), 'a');
-        fwrite($f, sprintf("[IKARUS %s]: %s at %s on line %d" . PHP_EOL, (new DateTime())->format("Y-m-d G:i:s.u"), $error->getMessage(), $error->getFile(), $error->getLine()));
-        fclose($f);
-        return parent::handleError($error, $management);
-    }
+    public function requestDispatchedResponse();
 }

@@ -33,21 +33,21 @@
  */
 
 /**
- * EngineTest.php
+ * TriggeredEngineTest.php
  * ikarus-sps
  *
- * Created on 2019-12-19 11:22 by thomas
+ * Created on 2020-01-29 17:34 by thomas
  */
 
-use Ikarus\SPS\Engine;
 use Ikarus\SPS\Plugin\Listener\CallbackListenerPlugin;
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 use Ikarus\SPS\Plugin\Trigger\CallbackTriggerPlugin;
 use Ikarus\SPS\Plugin\Trigger\StopEngineAfterIntervalPlugin;
 use Ikarus\SPS\Plugin\Trigger\StopEngineAtDatePlugin;
+use Ikarus\SPS\TriggeredEngine;
 use PHPUnit\Framework\TestCase;
 
-class EngineTest extends TestCase
+class TriggeredEngineTest extends TestCase
 {
     private $timer;
 
@@ -65,7 +65,7 @@ class EngineTest extends TestCase
     }
 
     public function testEnginePluginRegistration() {
-        $engine = new Engine("Ikarus");
+        $engine = new TriggeredEngine("Ikarus");
         $this->assertEquals("Ikarus", $engine->getName());
 
         $this->assertTrue( $engine->addPlugin($p1 = new CallbackTriggerPlugin(function() {
@@ -83,8 +83,8 @@ class EngineTest extends TestCase
     }
 
     public function testRunAndStop() {
-        $engine = new Engine();
-        $engine->addPlugin( new CallbackTriggerPlugin(function(PluginManagementInterface $management) {
+        $engine = new TriggeredEngine();
+        $engine->addPlugin( new CallbackTriggerPlugin(function(TriggeredPluginManagementInterface $management) {
             $management->stopEngine(13, "Error");
         }) );
 
@@ -93,7 +93,7 @@ class EngineTest extends TestCase
     }
 
     public function testAutoStopAfterInterval() {
-        $engine = new Engine();
+        $engine = new TriggeredEngine();
         $engine->addPlugin( new StopEngineAfterIntervalPlugin(0.3) );
 
         $this->startTimer();
@@ -102,7 +102,7 @@ class EngineTest extends TestCase
     }
 
     public function testAutoStopAtDate() {
-        $engine = new Engine();
+        $engine = new TriggeredEngine();
         $engine->addPlugin( new StopEngineAtDatePlugin( $d = new DateTime("now +1second") ) );
         $this->startTimer();
         $this->assertEquals(0, $engine->run());
@@ -110,8 +110,8 @@ class EngineTest extends TestCase
     }
 
     public function testCleanupHandler() {
-        $engine = new Engine();
-        $engine->addPlugin( new CallbackTriggerPlugin( function(PluginManagementInterface $management) {
+        $engine = new TriggeredEngine();
+        $engine->addPlugin( new CallbackTriggerPlugin( function(TriggeredPluginManagementInterface $management) {
             $management->stopEngine(1, 'Hehe');
         } ) );
 

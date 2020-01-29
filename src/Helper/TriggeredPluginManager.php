@@ -38,10 +38,10 @@ use Ikarus\SPS\Event\DispatchedEventInterface;
 use Ikarus\SPS\Event\DispatchedEventResponseInterface;
 use Ikarus\SPS\Event\ResponseEvent;
 use Ikarus\SPS\Event\StopEngineEvent;
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 use TASoft\Util\Pipe;
 
-class PluginManager implements PluginManagementInterface
+class TriggeredPluginManager implements TriggeredPluginManagementInterface
 {
     /** @var Pipe */
     private $eventRunloopPipe;

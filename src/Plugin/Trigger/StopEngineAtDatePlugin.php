@@ -37,7 +37,7 @@ namespace Ikarus\SPS\Plugin\Trigger;
 
 use DateTime;
 use Ikarus\SPS\Exception\SPSException;
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 
 class StopEngineAtDatePlugin extends AbstractEventTriggerPlugin
 {
@@ -50,7 +50,7 @@ class StopEngineAtDatePlugin extends AbstractEventTriggerPlugin
         $this->date = $date;
     }
 
-    public function run(PluginManagementInterface $manager)
+    public function run(TriggeredPluginManagementInterface $manager)
     {
         $dd = ($this->date->getTimestamp() + ($this->date->format("u") / 1e6)) - microtime(true);
         if($dd <= 0)

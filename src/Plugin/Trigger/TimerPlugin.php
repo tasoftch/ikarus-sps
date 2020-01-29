@@ -34,7 +34,7 @@
 
 namespace Ikarus\SPS\Plugin\Trigger;
 
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 
 class TimerPlugin extends AbstractEventTriggerPlugin
 {
@@ -55,7 +55,7 @@ class TimerPlugin extends AbstractEventTriggerPlugin
     }
 
 
-    public function run(PluginManagementInterface $manager)
+    public function run(TriggeredPluginManagementInterface $manager)
     {
         $count = 0;
         while (1) {

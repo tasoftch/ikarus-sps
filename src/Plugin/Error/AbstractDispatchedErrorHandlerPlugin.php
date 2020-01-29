@@ -37,7 +37,7 @@ namespace Ikarus\SPS\Plugin\Error;
 
 use Ikarus\SPS\Plugin\AbstractPlugin;
 use Ikarus\SPS\Plugin\DispatchedErrorHandlerPluginInterface;
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 use Throwable;
 
 abstract class AbstractDispatchedErrorHandlerPlugin extends AbstractPlugin implements DispatchedErrorHandlerPluginInterface
@@ -66,17 +66,17 @@ abstract class AbstractDispatchedErrorHandlerPlugin extends AbstractPlugin imple
      * Handles the error. If done, return true otherwise Ikarus will continue handling the error.
      *
      * @param ErrorInterface $error
-     * @param PluginManagementInterface $management
+     * @param TriggeredPluginManagementInterface $management
      * @return bool
      */
-    protected function handleError(ErrorInterface $error, PluginManagementInterface $management): bool {
+    protected function handleError(ErrorInterface $error, TriggeredPluginManagementInterface $management): bool {
         return $error instanceof Fatal ? false : true;
     }
 
     /**
      * @inheritDoc
      */
-    public function setupErrorEnvironment(PluginManagementInterface $management)
+    public function setupErrorEnvironment(TriggeredPluginManagementInterface $management)
     {
         set_error_handler(function($code, $msg, $file, $line) use ($management) {
             $bool = false;

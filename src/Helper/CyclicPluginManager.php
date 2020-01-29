@@ -32,43 +32,28 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Helper;
 
-use Ikarus\SPS\Event\DispatchedEventInterface;
-use Ikarus\SPS\Event\DispatchedEventResponseInterface;
 
-/**
- * Your plugins will be initialized every time the SPS runs.
- *
- * @package Ikarus\Plugin
- */
-interface PluginManagementInterface
+use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
+
+class CyclicPluginManager implements CyclicPluginManagementInterface
 {
-    /**
-     * SPS triggers may only use this method to trigger events!
-     *
-     * @param string $eventName
-     * @param $arguments
-     * @param DispatchedEventInterface|NULL $event
-     * @return void
-     */
-    public function dispatchEvent(string $eventName, DispatchedEventInterface $event = NULL, ...$arguments);
+    /** @var callable */
+    private $f, $rtf, $se;
 
-    /**
-     * Call this event if the plugin expects a response of the last triggered event.
-     * Calling this method blocks the thread until a response is available. So to avoid unexpected blocking, dispatch an event that already implements DispatchedEventResponseInterface.
-     *
-     * @return null|DispatchedEventResponseInterface
-     */
-    public function requestDispatchedResponse();
+    public function getFrequency(): int
+    {
+        return ($this->f)();
+    }
 
-    /**
-     * Calling this method sends a stop signal to the main sps process and it will terminate.
-     * If the main sps will execute the stop command, this method returns true otherwise the sps won't stop
-     *
-     * @param int $code
-     * @param string $reason
-     * @return bool
-     */
-    public function stopEngine($code = 0, $reason = ""): bool;
+    public function requireTemporaryFrequency(?int $otherFrequency = NULL): bool
+    {
+        return ($this->rtf)($otherFrequency);
+    }
+
+    public function stopEngine($code = 0, $reason = ""): bool
+    {
+        return ($this->se)($code, $reason);
+    }
 }

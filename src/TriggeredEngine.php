@@ -38,112 +38,53 @@ namespace Ikarus\SPS;
 use Ikarus\SPS\Event\DispatchedEvent;
 use Ikarus\SPS\Event\DispatchedEventResponseInterface;
 use Ikarus\SPS\Event\StopEngineEvent;
-use Ikarus\SPS\Helper\PluginManager;
 use Ikarus\SPS\Helper\ProcessManager;
+use Ikarus\SPS\Helper\TriggeredPluginManager;
 use Ikarus\SPS\Plugin\DispatchedErrorHandlerPluginInterface;
 use Ikarus\SPS\Plugin\Listener\ListenerPluginInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
-use Ikarus\SPS\Plugin\TearDownPluginInterface;
 use Ikarus\SPS\Plugin\Trigger\TriggerPluginInterface;
 use TASoft\Collection\PriorityCollection;
 use TASoft\EventManager\EventManager;
 use Throwable;
 
-class Engine implements EngineInterface
+class TriggeredEngine extends AbstractEngine implements TriggeredEngineInterface
 {
     /** @var EventManager */
     protected $eventManager;
-    /** @var PluginManager */
+    /** @var TriggeredPluginManager */
     protected $pluginManager;
     /** @var ProcessManager */
     protected $processManager;
-    /** @var string  */
-    private $name;
-    /** @var bool  */
-    protected $running = false;
-
-    protected $exitReason = "";
-
-    /** @var PriorityCollection */
-    protected $plugins;
-
     /** @var PriorityCollection */
     protected $errorPlugins;
 
-    /** @var callable|null */
-    protected $cleanUpHandler;
-
-
-    const RUNLOOP_CONTINUE = 1;
-    const RUNLOOP_SKIP_EVENT = 2;
-    const RUNLOOP_STOP_ENGINE = 3;
-
-
+    const RUNLOOP_SKIP_EVENT = 3;
 
     public function __construct($name = 'Ikarus SPS, (c) by TASoft Applications')
     {
+        parent::__construct($name);
         $this->eventManager = new EventManager();
-        $this->pluginManager = new PluginManager();
+        $this->pluginManager = new TriggeredPluginManager();
         $this->processManager = new ProcessManager();
-
-        $this->plugins = new PriorityCollection();
         $this->errorPlugins = new PriorityCollection();
-
-        $this->name = $name;
     }
 
-    /**
-     * @return string
-     */
-    public function getName(): string
+    protected function shouldAddPlugin(PluginInterface $plugin, int $priority): bool
     {
-        return $this->name;
+        if($plugin instanceof DispatchedErrorHandlerPluginInterface)
+            $this->errorPlugins->add($priority, $plugin);
+        return parent::shouldAddPlugin($plugin, $priority);
     }
 
-    /**
-     * Registers a plugin to use while engine runtime
-     *
-     * @param PluginInterface|ListenerPluginInterface|TriggerPluginInterface $plugin
-     * @param int $priority
-     * @return bool
-     */
-    public function addPlugin(PluginInterface $plugin, int $priority = 0) {
-        if($this->isRunning())
-            return false;
-
-        if(!$this->plugins->contains($plugin)) {
-            $this->plugins->add($priority, $plugin);
-            if($plugin instanceof DispatchedErrorHandlerPluginInterface)
-                $this->errorPlugins->add($priority, $plugin);
-        }
-
-        return true;
-    }
-
-    /**
-     * @param $plugin
-     * @return bool
-     */
-    public function removePlugin($plugin) {
-        if($this->isRunning())
-            return false;
-        $this->plugins->remove($plugin);
+    protected function willRemovePlugin(PluginInterface $plugin): bool
+    {
         $this->errorPlugins->remove($plugin);
-        return true;
+        return parent::willRemovePlugin($plugin);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function isRunning(): bool
+    function runEngine()
     {
-        return $this->running;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function run() {
         if($this->processManager->isMainProcess()) {
             $this->running = true;
             $this->setupEngine();
@@ -192,22 +133,10 @@ class Engine implements EngineInterface
         return 0;
     }
 
-    /**
-     * Stop the engine
-     * Please note: Only the main process can run/stop the engine!
-     */
-    public function stop() {
-        if($this->processManager->isMainProcess()) {
-            $this->tearDownEngine();
-            $this->running = false;
-        } else
-            trigger_error("Can only stop from main process", E_USER_WARNING);
-    }
+    protected function setupEngine()
+    {
+        parent::setupEngine();
 
-    /**
-     * Internal call to setup engine
-     */
-    protected function setupEngine() {
         $setupErrorEnv = function() {
             foreach($this->errorPlugins->getOrderedElements() as $plugin) {
                 if($plugin instanceof DispatchedErrorHandlerPluginInterface) {
@@ -236,25 +165,13 @@ class Engine implements EngineInterface
         }
     }
 
-    /**
-     * Internal call to tear down engine
-     */
-    protected function tearDownEngine() {
-        foreach($this->getPlugins() as $plugin) {
-            if($plugin instanceof TearDownPluginInterface)
-                $plugin->tearDown();
-            if($plugin instanceof ListenerPluginInterface) {
-                $this->eventManager->removeListener($plugin);
-            }
-        }
-
+    protected function tearDownEngine()
+    {
         $this->processManager->killAll();
         $this->processManager->waitForAll();
-
         $this->eventManager->removeAllListeners();
 
-        if(is_callable($cb = $this->getCleanUpHandler()))
-            call_user_func($cb);
+        parent::tearDownEngine();
     }
 
     /**
@@ -282,36 +199,5 @@ class Engine implements EngineInterface
             return static::RUNLOOP_STOP_ENGINE;
         }
         return static::RUNLOOP_CONTINUE;
-    }
-
-    /**
-     * @return callable|null
-     */
-    public function getCleanUpHandler()
-    {
-        return $this->cleanUpHandler;
-    }
-
-    /**
-     * @param callable|null $cleanUpHandler
-     */
-    public function setCleanUpHandler($cleanUpHandler)
-    {
-        $this->cleanUpHandler = $cleanUpHandler;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getPlugins(): array {
-        return $this->plugins->getOrderedElements();
-    }
-
-    /**
-     * @return string
-     */
-    public function getExitReason(): string
-    {
-        return $this->exitReason;
     }
 }

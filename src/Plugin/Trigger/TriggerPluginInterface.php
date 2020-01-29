@@ -35,8 +35,8 @@
 namespace Ikarus\SPS\Plugin\Trigger;
 
 
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
-use Ikarus\SPS\Plugin\PluginManagementInterface;
 
 /**
  * A trigger plugin is interacting with a device and notifies the SPS if something happend on the device.
@@ -48,8 +48,8 @@ interface TriggerPluginInterface extends PluginInterface
     /**
      * Start the plugin now and do stuff.
      *
-     * @param PluginManagementInterface $manager
+     * @param TriggeredPluginManagementInterface $manager
      * @return void
      */
-    public function run(PluginManagementInterface $manager);
+    public function run(TriggeredPluginManagementInterface $manager);
 }

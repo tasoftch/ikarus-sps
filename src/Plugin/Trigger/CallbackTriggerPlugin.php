@@ -3,7 +3,7 @@
 namespace Ikarus\SPS\Plugin\Trigger;
 
 
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 
 class CallbackTriggerPlugin extends AbstractEventTriggerPlugin
 {
@@ -15,7 +15,7 @@ class CallbackTriggerPlugin extends AbstractEventTriggerPlugin
         $this->callback = $calback;
     }
 
-    public function run(PluginManagementInterface $manager)
+    public function run(TriggeredPluginManagementInterface $manager)
     {
         call_user_func($this->callback, $manager);
     }

@@ -37,7 +37,7 @@ namespace Ikarus\SPS\Plugin\Error;
 
 use Ikarus\SPS\Event\PluginErrorEvent;
 use Ikarus\SPS\Event\ResponseEvent;
-use Ikarus\SPS\Plugin\PluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 
 class DispatchedEventTriggerErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
 {
@@ -76,7 +76,7 @@ class DispatchedEventTriggerErrorHandlerPlugin extends AbstractDispatchedErrorHa
         return $this->defaultErrorEventName;
     }
 
-    protected function handleError(ErrorInterface $error, PluginManagementInterface $management): bool
+    protected function handleError(ErrorInterface $error, TriggeredPluginManagementInterface $management): bool
     {
         $eventName = $this->getClassNamesMap()[ get_class($error) ] ?? $this->getDefaultErrorEventName();
 

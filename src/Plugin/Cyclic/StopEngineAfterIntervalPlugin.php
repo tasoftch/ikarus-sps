@@ -32,35 +32,45 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS\Plugin\Cyclic;
 
 
-use DateTime;
-use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
+use Ikarus\SPS\Plugin\SetupPluginInterface;
 
-class DispatchedFileLoggerErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin
+class StopEngineAfterIntervalPlugin extends AbstractCyclicPlugin implements SetupPluginInterface
 {
-    private $filename;
+    /** @var float */
+    private $interval;
+    private $_startTS;
 
-    public function __construct($filename = NULL, $error_reporting = E_ALL)
+    /**
+     * StopEngineAfterIntervalPlugin constructor.
+     * @param float $interval
+     */
+    public function __construct(float $interval)
     {
-        parent::__construct($error_reporting);
-        $this->filename = NULL === $filename ? (ini_get("error_log") ?? 'error_log') : $filename;
+        $this->interval = $interval;
+    }
+
+
+    public function setup()
+    {
+        $this->_startTS = microtime(true);
+    }
+
+    public function update(CyclicPluginManagementInterface $pluginManagement)
+    {
+        $diff = microtime(true) - $this->_startTS;
+        if($diff >= $this->getInterval())
+            $pluginManagement->stopEngine();
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getFilename(): string
+    public function getInterval(): float
     {
-        return $this->filename;
-    }
-
-    protected function handleError(ErrorInterface $error, TriggeredPluginManagementInterface $management): bool
-    {
-        $f = fopen($this->getFilename(), 'a');
-        fwrite($f, sprintf("[IKARUS %s]: %s at %s on line %d" . PHP_EOL, (new DateTime())->format("Y-m-d G:i:s.u"), $error->getMessage(), $error->getFile(), $error->getLine()));
-        fclose($f);
-        return parent::handleError($error, $management);
+        return $this->interval;
     }
 }
