@@ -35,7 +35,6 @@
 namespace Ikarus\SPS\Helper;
 
 
-use Ikarus\SPS\Exception\SignalKillException;
 use Ikarus\SPS\Plugin\TearDownPluginInterface;
 use Ikarus\SPS\Exception\SPSException;
 
@@ -45,11 +44,16 @@ class ProcessManager
     private $processes = [];
     private $plugin;
 
-    public function signalHandler() {
-        if($this->plugin instanceof TearDownPluginInterface)
-            $this->plugin->tearDown();
+    public function __construct()
+    {
+        pcntl_signal(SIGTERM, function() {
+            foreach($this->processes as $pid => $plugin) {
+                if($plugin instanceof TearDownPluginInterface)
+                    $plugin->tearDown();
 
-        throw new SignalKillException("Process killed");
+                posix_kill($pid, SIGTERM);
+            }
+        });
     }
 
     /**
@@ -72,11 +76,9 @@ class ProcessManager
         $pid = pcntl_fork();
         if($pid > 0) {
             $this->processes[$pid] = $plugin;
-            pcntl_signal(SIGINT, [$this, 'signalHandler']);
         } elseif($pid == 0) {
             $this->mainProcess = false;
             $this->plugin = $plugin;
-            pcntl_signal(SIGINT, [$this, 'signalHandler']);
         }
         else
             throw new SPSException("Could not fork the process");
