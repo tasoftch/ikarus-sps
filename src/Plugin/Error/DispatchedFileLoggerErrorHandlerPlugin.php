@@ -36,6 +36,7 @@ namespace Ikarus\SPS\Plugin\Error;
 
 
 use DateTime;
+use Ikarus\SPS\Error\ErrorInterface;
 use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 
 class DispatchedFileLoggerErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin

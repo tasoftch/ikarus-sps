@@ -35,6 +35,7 @@
 namespace Ikarus\SPS;
 
 
+use Ikarus\SPS\Exception\InterruptException;
 use Ikarus\SPS\Helper\CyclicPluginManager;
 use Ikarus\SPS\Plugin\Cyclic\CyclicPluginInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
@@ -115,10 +116,18 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             if($waitFor > 0)
                 usleep($waitFor * 1e6);
 
+            if(!$this->isRunning())
+                break;
+
             foreach($this->cyclicPlugins->getOrderedElements() as $plugin) {
                 if($scheduler[$plugin->getIdentifier()] < microtime(true)) {
                     $schedule( $this->getFrequency() );
-                    $plugin->update($manager);
+                    try {
+                        $plugin->update($manager);
+                    } catch (InterruptException $exception) {
+                        if(!$this->handleInterruption($exception, $manager))
+                            throw $exception;
+                    }
                     if(!$this->isRunning())
                         break;
                 }

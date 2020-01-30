@@ -32,61 +32,9 @@
  *
  */
 
-namespace Ikarus\SPS\Event;
+namespace Ikarus\SPS\Error;
 
-use Ikarus\SPS\Error\ErrorInterface;
 
-/**
- * Listen for this event to receive error notifications from plugins (if available)
- *
- * @package Ikarus\SPS\Event
- */
-class PluginErrorEvent extends ResponseEvent
+class Exception extends Fatal
 {
-    private $code;
-    private $file;
-    private $line;
-    private $className;
-
-    public function __construct($code, $message, $file, $line, $class)
-    {
-        parent::__construct($message ?: "");
-        $this->code = $code;
-        $this->file = $file;
-        $this->line = $line;
-        $this->className = $class;
-    }
-
-    public function serialize()
-    {
-        return serialize([
-            $this->code,
-            $this->file,
-            $this->line,
-            $this->className,
-            parent::serialize()
-        ]);
-    }
-
-    public function unserialize($serialized)
-    {
-        list($this->code, $this->file, $this->line, $this->className, $parent) = unserialize($serialized);
-        parent::unserialize($parent);
-    }
-
-    /**
-     * @return ErrorInterface
-     */
-    public function getError(): ErrorInterface {
-        $c = $this->className;
-        return new $c($this->code, $this->getResponse(), $this->file, $this->line);
-    }
-
-    /**
-     * At least one listener should stop propagation to inform the plugin's event handler, that the event handling is in process.
-     */
-    public function stopPropagation()
-    {
-        parent::stopPropagation();
-    }
 }

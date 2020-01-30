@@ -40,13 +40,13 @@
  */
 
 use Ikarus\SPS\Event\PluginErrorEvent;
-use Ikarus\SPS\Plugin\Error\Deprecated;
+use Ikarus\SPS\Error\Deprecated;
 use Ikarus\SPS\Plugin\Error\DispatchedEventTriggerErrorHandlerPlugin;
 use Ikarus\SPS\Plugin\Error\DispatchedFileLoggerErrorHandlerPlugin;
 use Ikarus\SPS\Plugin\Error\DispatchedIgnoreErrorHandlerPlugin;
-use Ikarus\SPS\Plugin\Error\Fatal;
-use Ikarus\SPS\Plugin\Error\Notice;
-use Ikarus\SPS\Plugin\Error\Warning;
+use Ikarus\SPS\Error\Fatal;
+use Ikarus\SPS\Error\Notice;
+use Ikarus\SPS\Error\Warning;
 use Ikarus\SPS\Plugin\Listener\CallbackListenerPlugin;
 use Ikarus\SPS\Plugin\Trigger\CallbackTriggerPlugin;
 use Ikarus\SPS\TriggeredEngine;

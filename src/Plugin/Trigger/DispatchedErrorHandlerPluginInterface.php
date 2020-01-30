@@ -32,61 +32,23 @@
  *
  */
 
-namespace Ikarus\SPS\Event;
+namespace Ikarus\SPS\Plugin\Trigger;
 
-use Ikarus\SPS\Error\ErrorInterface;
+use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
+use Ikarus\SPS\Plugin\PluginInterface;
 
 /**
- * Listen for this event to receive error notifications from plugins (if available)
+ * Error handler plugins are special plugins. They are not dispatched as trigger and also not registered as listener.
+ * But an error handler plugin is invoked before each dispatched trigger plugin to handle errors in child process.
  *
- * @package Ikarus\SPS\Event
+ * @package Ikarus\SPS\Plugin
  */
-class PluginErrorEvent extends ResponseEvent
+interface DispatchedErrorHandlerPluginInterface extends PluginInterface
 {
-    private $code;
-    private $file;
-    private $line;
-    private $className;
-
-    public function __construct($code, $message, $file, $line, $class)
-    {
-        parent::__construct($message ?: "");
-        $this->code = $code;
-        $this->file = $file;
-        $this->line = $line;
-        $this->className = $class;
-    }
-
-    public function serialize()
-    {
-        return serialize([
-            $this->code,
-            $this->file,
-            $this->line,
-            $this->className,
-            parent::serialize()
-        ]);
-    }
-
-    public function unserialize($serialized)
-    {
-        list($this->code, $this->file, $this->line, $this->className, $parent) = unserialize($serialized);
-        parent::unserialize($parent);
-    }
-
     /**
-     * @return ErrorInterface
+     * This method gets called before each dispatched trigger plugin.
+     *
+     * @param TriggeredPluginManagementInterface $management
      */
-    public function getError(): ErrorInterface {
-        $c = $this->className;
-        return new $c($this->code, $this->getResponse(), $this->file, $this->line);
-    }
-
-    /**
-     * At least one listener should stop propagation to inform the plugin's event handler, that the event handling is in process.
-     */
-    public function stopPropagation()
-    {
-        parent::stopPropagation();
-    }
+    public function setupErrorEnvironment(TriggeredPluginManagementInterface $management);
 }

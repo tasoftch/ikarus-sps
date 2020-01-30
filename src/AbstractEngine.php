@@ -34,6 +34,9 @@
 
 namespace Ikarus\SPS;
 
+use Ikarus\SPS\Exception\InterruptException;
+use Ikarus\SPS\Plugin\InterruptPluginInterface;
+use Ikarus\SPS\Plugin\Management\PluginManagementInterface;
 use Ikarus\SPS\Plugin\PluginChildrenInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
 use Ikarus\SPS\Plugin\SetupPluginInterface;
@@ -48,6 +51,8 @@ abstract class AbstractEngine implements EngineInterface
     protected $running = false;
     /** @var PriorityCollection */
     protected $plugins;
+    /** @var PriorityCollection */
+    protected $interruptionPlugins;
     /** @var callable|null */
     protected $cleanupHandler;
 
@@ -60,6 +65,8 @@ abstract class AbstractEngine implements EngineInterface
     public function __construct($name = 'Ikarus SPS, (c) by TASoft Applications')
     {
         $this->plugins = new PriorityCollection();
+        $this->interruptionPlugins = new PriorityCollection();
+
         $this->name = $name;
     }
 
@@ -87,6 +94,9 @@ abstract class AbstractEngine implements EngineInterface
             if($plugin instanceof PluginChildrenInterface) {
                 foreach($plugin->getChildPlugins() as $p)
                     $this->addPlugin($p, $priority);
+            }
+            if($plugin instanceof InterruptPluginInterface) {
+                $this->interruptionPlugins->add($priority, $plugin);
             }
             return true;
         }
@@ -200,6 +210,22 @@ abstract class AbstractEngine implements EngineInterface
 
         if(is_callable($cb = $this->getCleanUpHandler()))
             call_user_func($cb);
+    }
+
+    /**
+     * Internal call to handle interruptions
+     *
+     * @param InterruptException $exception
+     * @param PluginManagementInterface $management
+     * @return bool
+     */
+    protected function handleInterruption(InterruptException $exception, PluginManagementInterface $management): bool {
+        /** @var InterruptPluginInterface $plugin */
+        foreach($this->interruptionPlugins->getOrderedElements() as $plugin) {
+            if($plugin->performInterrupt($exception, $management))
+                return true;
+        }
+        return false;
     }
 
     /**

@@ -32,9 +32,9 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS\Error;
 
 
-class Exception extends Fatal
+class Deprecated extends Notice
 {
 }

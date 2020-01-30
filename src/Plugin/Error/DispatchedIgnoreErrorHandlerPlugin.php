@@ -36,6 +36,8 @@ namespace Ikarus\SPS\Plugin\Error;
 
 
 
+use Ikarus\SPS\Error\ErrorInterface;
+use Ikarus\SPS\Error\Fatal;
 use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 
 class DispatchedIgnoreErrorHandlerPlugin extends AbstractDispatchedErrorHandlerPlugin

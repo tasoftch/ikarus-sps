@@ -32,7 +32,7 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS\Error;
 
 
 interface ErrorInterface

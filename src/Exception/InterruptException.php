@@ -32,61 +32,29 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS\Exception;
 
 
-class Notice implements ErrorInterface
+use Ikarus\SPS\Error\ErrorInterface;
+
+class InterruptException extends SPSException
 {
-    protected $code;
-    protected $message;
-    protected $file;
-    protected $line;
+    /** @var ErrorInterface|null */
+    private $error;
 
     /**
-     * Notice constructor.
-     * @param $code
-     * @param $message
-     * @param $file
-     * @param $line
+     * @return ErrorInterface|null
      */
-    public function __construct($code = 0, $message = "", $file = "", $line = 0)
+    public function getError(): ?ErrorInterface
     {
-        $this->code = $code;
-        $this->message = $message;
-        $this->file = $file;
-        $this->line = $line;
-    }
-
-
-    /**
-     * @return mixed
-     */
-    public function getCode()
-    {
-        return $this->code;
+        return $this->error;
     }
 
     /**
-     * @return mixed
+     * @param ErrorInterface|null $error
      */
-    public function getMessage()
+    public function setError(?ErrorInterface $error): void
     {
-        return $this->message;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getFile()
-    {
-        return $this->file;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getLine()
-    {
-        return $this->line;
+        $this->error = $error;
     }
 }

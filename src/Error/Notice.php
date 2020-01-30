@@ -32,22 +32,61 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Error;
 
-use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 
-/**
- * Error handler plugins are special plugins. They are not dispatched as trigger and also not registered as listener.
- * But an error handler plugin is invoked before each dispatched trigger plugin to handle errors in child process.
- *
- * @package Ikarus\SPS\Plugin
- */
-interface DispatchedErrorHandlerPluginInterface extends PluginInterface
+class Notice implements ErrorInterface
 {
+    protected $code;
+    protected $message;
+    protected $file;
+    protected $line;
+
     /**
-     * This method gets called before each dispatched trigger plugin.
-     *
-     * @param TriggeredPluginManagementInterface $management
+     * Notice constructor.
+     * @param $code
+     * @param $message
+     * @param $file
+     * @param $line
      */
-    public function setupErrorEnvironment(TriggeredPluginManagementInterface $management);
+    public function __construct($code = 0, $message = "", $file = "", $line = 0)
+    {
+        $this->code = $code;
+        $this->message = $message;
+        $this->file = $file;
+        $this->line = $line;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLine()
+    {
+        return $this->line;
+    }
 }

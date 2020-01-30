@@ -32,9 +32,31 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS\Plugin;
 
 
-class Warning extends Notice
+use Ikarus\SPS\Exception\InterruptException;
+use Ikarus\SPS\Plugin\Management\PluginManagementInterface;
+
+/**
+ * Interface InterruptPluginInterface
+ *
+ * The interrupt plugin interface can be used to mark plugins that are responsible to bring your sps in a save state, for example after an error.
+ * So anywhere in the sps there may be thrown interrupt exceptions which immediately terminate the current cycle and need to be handled with interruption plugins.
+ * If no plugin did handle an interruption, the sps tears down.
+ *
+ * @package Ikarus\SPS\Plugin
+ */
+interface InterruptPluginInterface extends PluginInterface
 {
+    /**
+     * This method gets called to handle the interruption.
+     *
+     * If the interruption could be handled, return true and the sps will continue (cyclic will resume the cycles and triggered will listen for new events)
+     *
+     * @param InterruptException $exception
+     * @param PluginManagementInterface $management
+     * @return bool
+     */
+    public function performInterrupt(InterruptException $exception, PluginManagementInterface $management): bool;
 }

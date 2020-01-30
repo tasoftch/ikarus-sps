@@ -35,8 +35,14 @@
 namespace Ikarus\SPS\Plugin\Error;
 
 
+use Ikarus\SPS\Error\Deprecated;
+use Ikarus\SPS\Error\ErrorInterface;
+use Ikarus\SPS\Error\Exception;
+use Ikarus\SPS\Error\Fatal;
+use Ikarus\SPS\Error\Notice;
+use Ikarus\SPS\Error\Warning;
 use Ikarus\SPS\Plugin\AbstractPlugin;
-use Ikarus\SPS\Plugin\DispatchedErrorHandlerPluginInterface;
+use Ikarus\SPS\Plugin\Trigger\DispatchedErrorHandlerPluginInterface;
 use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
 use Throwable;
 

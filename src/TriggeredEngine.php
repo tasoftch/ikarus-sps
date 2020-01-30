@@ -35,14 +35,18 @@
 namespace Ikarus\SPS;
 
 
+use Ikarus\SPS\Error\Exception;
 use Ikarus\SPS\Event\DispatchedEvent;
 use Ikarus\SPS\Event\DispatchedEventResponseInterface;
+use Ikarus\SPS\Event\PluginErrorEvent;
+use Ikarus\SPS\Event\ResponseEvent;
 use Ikarus\SPS\Event\StopEngineEvent;
+use Ikarus\SPS\Exception\InterruptException;
 use Ikarus\SPS\Helper\ProcessManager;
 use Ikarus\SPS\Helper\TriggeredPluginManager;
-use Ikarus\SPS\Plugin\DispatchedErrorHandlerPluginInterface;
 use Ikarus\SPS\Plugin\Listener\ListenerPluginInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
+use Ikarus\SPS\Plugin\Trigger\DispatchedErrorHandlerPluginInterface;
 use Ikarus\SPS\Plugin\Trigger\TriggerPluginInterface;
 use TASoft\Collection\PriorityCollection;
 use TASoft\EventManager\EventManager;
@@ -101,22 +105,31 @@ class TriggeredEngine extends AbstractEngine implements TriggeredEngineInterface
 
                         return $event->getCode();
                     }
-                    if(!$event)
-                        $event = new DispatchedEvent();
+                    if($name == 'IKARUS.INTERRUPT' && $event instanceof PluginErrorEvent) {
+                        $e = $event->getError();
+                        $ex = new InterruptException($e->getMessage(), $e->getCode());
+                        $ex->setError($e);
+                        if($this->handleInterruption($ex, $this->pluginManager)) {
+                            $event->stopPropagation();
+                        }
+                    } else {
+                        if(!$event)
+                            $event = new DispatchedEvent();
 
-                    $code = $this->willHandleDispatchedEvent($name, $event, $arguments);
-                    if($code == static::RUNLOOP_STOP_ENGINE)
-                        break;
-                    if($code == static::RUNLOOP_SKIP_EVENT)
-                        continue;
+                        $code = $this->willHandleDispatchedEvent($name, $event, $arguments);
+                        if($code == static::RUNLOOP_STOP_ENGINE)
+                            break;
+                        if($code == static::RUNLOOP_SKIP_EVENT)
+                            continue;
 
-                    $event = $this->eventManager->trigger($name, $event, ...$arguments);
+                        $event = $this->eventManager->trigger($name, $event, ...$arguments);
 
-                    $code = $this->didHandleDispatchedEvent($name, $event, $arguments);
-                    if($code == static::RUNLOOP_STOP_ENGINE)
-                        break;
-                    if($code == static::RUNLOOP_SKIP_EVENT)
-                        continue;
+                        $code = $this->didHandleDispatchedEvent($name, $event, $arguments);
+                        if($code == static::RUNLOOP_STOP_ENGINE)
+                            break;
+                        if($code == static::RUNLOOP_SKIP_EVENT)
+                            continue;
+                    }
 
                     if($event instanceof DispatchedEventResponseInterface) {
                         $this->pluginManager->postResponse($event);
@@ -152,7 +165,23 @@ class TriggeredEngine extends AbstractEngine implements TriggeredEngineInterface
                     // Child process
                     usleep(1000);
                     $setupErrorEnv();
-                    $plugin->run( $this->pluginManager );
+
+                    restart:
+
+                    try {
+                        $plugin->run( $this->pluginManager );
+                    } catch (InterruptException $exception) {
+                        // Send an interruption event to the main sps
+                        $ev = new PluginErrorEvent($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), Exception::class);
+                        $this->pluginManager->dispatchEvent("IKARUS.INTERRUPT", $ev);
+                        $event = $this->pluginManager->requestDispatchedResponse();
+                        if($event instanceof ResponseEvent) {
+                            if($event->isPropagationStopped()) {
+                                goto restart;
+                            }
+                        }
+                    }
+
                     exit();
                 }
             } elseif($plugin instanceof ListenerPluginInterface) {
