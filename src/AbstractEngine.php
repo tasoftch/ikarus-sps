@@ -34,6 +34,7 @@
 
 namespace Ikarus\SPS;
 
+use Ikarus\SPS\Plugin\PluginChildrenInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
 use Ikarus\SPS\Plugin\SetupPluginInterface;
 use Ikarus\SPS\Plugin\TearDownPluginInterface;
@@ -83,6 +84,10 @@ abstract class AbstractEngine implements EngineInterface
 
         if(!$this->plugins->contains($plugin) && $this->shouldAddPlugin($plugin, $priority)) {
             $this->plugins->add($priority, $plugin);
+            if($plugin instanceof PluginChildrenInterface) {
+                foreach($plugin->getChildPlugins() as $p)
+                    $this->addPlugin($p, $priority);
+            }
             return true;
         }
 
