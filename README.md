@@ -8,8 +8,20 @@ $ composer require ikarus/sps
 ````
 
 #### How Ikarus SPS works
-1.  There is usually one instance of a SPS Engine.
-1.  This instance needs two kinds of plugins: listeners and triggers.
+
+The Ikarus SPS engine distinguish between two kinds of run modes:
+1.  __Cycle based engine__  
+    This engine type defines a fixed frequency, for example 2Hz, which means, that the engine updates twice per second.
+1.  __Event based engine__  
+    The event based engine waits until an event gets triggered from one of its plugins.
+    
+So it depends of your requirements, which kind of SPS engine you prefer.
+
+__General workflow__
+
+1.  There is usually one instance of a SPS Engine running on a device.
+1.  __Eventbased__: This instance needs two kinds of plugins: listeners and triggers.  
+    __or cyclebased__: The instance needs only cycle plugins.
 1.  The listener waits until something happens in the SPS to perform an action. (SPS to device)  
     Example: A timer event was triggered and the listener now instructs a motor to close the door.
 1.  A trigger wait until something happens on the device and informs the SPS. (Device to SPS)  
