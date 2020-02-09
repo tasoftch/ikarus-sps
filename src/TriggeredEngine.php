@@ -90,7 +90,6 @@ class TriggeredEngine extends AbstractEngine implements TriggeredEngineInterface
     function runEngine()
     {
         if($this->processManager->isMainProcess()) {
-            $this->running = true;
             $this->setupEngine();
 
             try {

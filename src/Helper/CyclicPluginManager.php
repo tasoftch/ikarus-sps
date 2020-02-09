@@ -54,6 +54,6 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
 
     public function stopEngine($code = 0, $reason = ""): bool
     {
-        return ($this->se)($code, $reason);
+        return ($this->se)($code, $reason) ? true : false;
     }
 }

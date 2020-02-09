@@ -39,13 +39,13 @@ use Ikarus\SPS\Event\DispatchedEventResponseInterface;
 use Ikarus\SPS\Event\ResponseEvent;
 use Ikarus\SPS\Event\StopEngineEvent;
 use Ikarus\SPS\Plugin\Management\TriggeredPluginManagementInterface;
-use TASoft\Util\Pipe;
+use TASoft\Util\Pipe\UnixPipe;
 
 class TriggeredPluginManager implements TriggeredPluginManagementInterface
 {
-    /** @var Pipe */
+    /** @var UnixPipe */
     private $eventRunloopPipe;
-    /** @var Pipe */
+    /** @var UnixPipe */
     private $pluginTalkbackPipe;
 
     /**
@@ -53,14 +53,17 @@ class TriggeredPluginManager implements TriggeredPluginManagementInterface
      */
     public function __construct()
     {
-        $this->eventRunloopPipe = new Pipe();
-        $this->pluginTalkbackPipe = new Pipe();
+        $this->eventRunloopPipe = new UnixPipe();
+        $this->pluginTalkbackPipe = new UnixPipe();
     }
 
     /**
      * Blocks the thread until a SPS trigger triggers an event
      * Called from main process
      *
+     * @param $name
+     * @param $event
+     * @param $arguments
      * @return bool
      */
     public function trapEvent(&$name, &$event, &$arguments) {

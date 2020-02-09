@@ -159,6 +159,7 @@ abstract class AbstractEngine implements EngineInterface
     {
         if($this->isRunning()) {
             $this->tearDownEngine();
+            $this->running = false;
         }
     }
 

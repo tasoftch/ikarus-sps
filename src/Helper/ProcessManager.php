@@ -42,19 +42,6 @@ class ProcessManager
 {
     private $mainProcess = true;
     private $processes = [];
-    private $plugin;
-
-    public function __construct()
-    {
-        pcntl_signal(SIGTERM, function() {
-            foreach($this->processes as $pid => $plugin) {
-                if($plugin instanceof TearDownPluginInterface)
-                    $plugin->tearDown();
-
-                posix_kill($pid, SIGTERM);
-            }
-        });
-    }
 
     /**
      * @return bool
@@ -78,7 +65,12 @@ class ProcessManager
             $this->processes[$pid] = $plugin;
         } elseif($pid == 0) {
             $this->mainProcess = false;
-            $this->plugin = $plugin;
+            if($plugin instanceof TearDownPluginInterface) {
+                pcntl_signal(SIGTERM, function() use ($plugin) {
+                    $plugin->tearDown();
+                    exit();
+                });
+            }
         }
         else
             throw new SPSException("Could not fork the process");
@@ -109,8 +101,10 @@ class ProcessManager
     public function killAll() {
         foreach($this->processes as $pid => $plugin) {
             posix_kill($pid, SIGTERM);
+            posix_kill($pid, SIGKILL);
         }
         $this->processes = [];
+        pcntl_signal_dispatch();
     }
 
     /**

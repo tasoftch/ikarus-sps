@@ -36,6 +36,7 @@ namespace Ikarus\SPS;
 
 
 use Ikarus\SPS\Exception\InterruptException;
+use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Helper\CyclicPluginManager;
 use Ikarus\SPS\Plugin\Cyclic\CyclicPluginInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
@@ -81,8 +82,6 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
 
     function runEngine()
     {
-        $manager = new CyclicPluginManager();
-
         $scheduler = [];
 
         $_TS = microtime(true);
@@ -92,6 +91,11 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             $scheduler[ $plugin->getIdentifier() ] = $_TS;
         }
 
+        if(!$scheduler) {
+            throw new SPSException("Engine does not have any plugin", 13);
+        }
+
+        $manager = new CyclicPluginManager();
         $vi = new ValueInjector($manager, CyclicPluginManager::class);
         $vi->f = function() { return $this->getFrequency(); };
 

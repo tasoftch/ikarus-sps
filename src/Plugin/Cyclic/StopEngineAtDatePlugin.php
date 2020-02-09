@@ -35,18 +35,19 @@
 namespace Ikarus\SPS\Plugin\Cyclic;
 
 
+use DateTime;
 use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 
 class StopEngineAtDatePlugin extends AbstractCyclicPlugin
 {
-    /** @var \DateTime */
+    /** @var DateTime */
     private $date;
 
     /**
      * StopEngineAtDatePlugin constructor.
-     * @param \DateTime $date
+     * @param DateTime $date
      */
-    public function __construct(\DateTime $date)
+    public function __construct(DateTime $date)
     {
         $this->date = $date;
     }
@@ -60,9 +61,9 @@ class StopEngineAtDatePlugin extends AbstractCyclicPlugin
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
-    public function getDate(): \DateTime
+    public function getDate(): DateTime
     {
         return $this->date;
     }
