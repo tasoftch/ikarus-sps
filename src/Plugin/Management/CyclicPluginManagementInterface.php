@@ -56,4 +56,41 @@ interface CyclicPluginManagementInterface extends PluginManagementInterface
      * @return bool
      */
     public function requireTemporaryFrequency(int $otherFrequency = NULL): bool;
+
+
+
+    // Intercommunication between cyclic plugins
+
+    /**
+     * Puts a command to the cycle stack
+     *
+     * @param string $command
+     * @param null $info
+     * @return void
+     */
+    public function putCommand(string $command, $info = NULL);
+
+    /**
+     * Checks if a specific command is on stack or if $command is NULL checks if any command is in stack.
+     *
+     * @param string|NULL $command
+     * @return bool
+     */
+    public function hasCommand(string $command = NULL): bool;
+
+    /**
+     * Gets the info of a command
+     *
+     * @param string $command
+     * @return mixed
+     */
+    public function getCommand(string $command);
+
+    /**
+     * Removes a specific command or all commands from stack.
+     *
+     * @param string|NULL $command
+     * @return void
+     */
+    public function clearCommand(string $command = NULL);
 }

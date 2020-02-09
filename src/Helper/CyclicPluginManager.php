@@ -42,6 +42,8 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
     /** @var callable */
     private $f, $rtf, $se;
 
+    private $commands = [];
+
     public function getFrequency(): int
     {
         return ($this->f)();
@@ -55,5 +57,28 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
     public function stopEngine($code = 0, $reason = ""): bool
     {
         return ($this->se)($code, $reason) ? true : false;
+    }
+
+    public function putCommand(string $command, $info = NULL)
+    {
+        $this->commands[$command] = $info;
+    }
+
+    public function hasCommand(string $command = NULL): bool
+    {
+        return NULL !== $command ? isset($this->commands[$command]) : !empty($this->commands);
+    }
+
+    public function getCommand(string $command)
+    {
+        return $this->commands[$command] ?? NULL;
+    }
+
+    public function clearCommand(string $command = NULL)
+    {
+        if($command)
+            unset($this->commands[$command]);
+        else
+            $this->commands = [];
     }
 }
