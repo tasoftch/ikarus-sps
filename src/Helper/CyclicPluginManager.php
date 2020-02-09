@@ -83,8 +83,7 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
         else
             $this->commands = [];
     }
-
-    public function putValue($value, $key, $domain = NULL)
+    public function putValue($value, $key, $domain)
     {
         if(NULL === $value)
             unset($this->values[$domain][$key]);
@@ -92,13 +91,17 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
             $this->values[$domain][$key] = $value;
     }
 
-    public function hasValue($key, $domain = NULL): bool
+    public function hasValue($domain, $key = NULL): bool
     {
-        return isset($this->values[$domain][$key]);
+        if($key !== NULL)
+            return isset($this->values[$domain][$key]);
+        return isset($this->values[$domain]);
     }
 
-    public function fetchValue($key, $domain = NULL)
+    public function fetchValue($domain, $key = NULL)
     {
-        return $this->values[$domain][$key] ?? NULL;
+        if($key !== NULL)
+            return $this->values[$domain][$key] ?? NULL;
+        return $this->values[$domain] ?? NULL;
     }
 }

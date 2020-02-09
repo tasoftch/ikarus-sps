@@ -97,24 +97,28 @@ interface CyclicPluginManagementInterface extends PluginManagementInterface
     /**
      * Puts a value for a specific key in a domain
      *
-     * @param $value
-     * @param $key
-     * @param null $domain
+     * @param mixed $value
+     * @param string $key
+     * @param string $domain
      * @return void
      */
-    public function putValue($value, $key, $domain = NULL);
+    public function putValue($value, $key, $domain);
 
     /**
-     * @param $key
-     * @param null $domain
+     * Checks, if a value exists in a domain or specific of a key
+     *
+     * @param string|null $key
+     * @param string $domain
      * @return bool
      */
-    public function hasValue($key, $domain = NULL): bool;
+    public function hasValue($domain, $key = NULL): bool;
 
     /**
-     * @param $key
-     * @param null $domain
+     * Fetches a value from a domain, filtered by a key if specified.
+     *
+     * @param string|null $key
+     * @param string $domain
      * @return mixed
      */
-    public function fetchValue($key, $domain = NULL);
+    public function fetchValue($domain, $key = NULL);
 }
