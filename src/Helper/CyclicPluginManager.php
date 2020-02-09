@@ -43,6 +43,8 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
     private $f, $rtf, $se;
 
     private $commands = [];
+    private $values = [];
+
 
     public function getFrequency(): int
     {
@@ -80,5 +82,23 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
             unset($this->commands[$command]);
         else
             $this->commands = [];
+    }
+
+    public function putValue($value, $key, $domain = NULL)
+    {
+        if(NULL === $value)
+            unset($this->values[$domain][$key]);
+        else
+            $this->values[$domain][$key] = $value;
+    }
+
+    public function hasValue($key, $domain = NULL): bool
+    {
+        return isset($this->values[$domain][$key]);
+    }
+
+    public function fetchValue($key, $domain = NULL)
+    {
+        return $this->values[$domain][$key] ?? NULL;
     }
 }

@@ -93,4 +93,28 @@ interface CyclicPluginManagementInterface extends PluginManagementInterface
      * @return void
      */
     public function clearCommand(string $command = NULL);
+
+    /**
+     * Puts a value for a specific key in a domain
+     *
+     * @param $value
+     * @param $key
+     * @param null $domain
+     * @return void
+     */
+    public function putValue($value, $key, $domain = NULL);
+
+    /**
+     * @param $key
+     * @param null $domain
+     * @return bool
+     */
+    public function hasValue($key, $domain = NULL): bool;
+
+    /**
+     * @param $key
+     * @param null $domain
+     * @return mixed
+     */
+    public function fetchValue($key, $domain = NULL);
 }
