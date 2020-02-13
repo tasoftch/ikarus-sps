@@ -142,17 +142,19 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
         if(!$this->socket) {
             if (($this->socket = $sock = socket_create(NULL !== $this->getPort() ? AF_INET : AF_UNIX, SOCK_STREAM, SOL_TCP)) === false) {
                 trigger_error( "socket_create() failed: " . socket_strerror(socket_last_error()), E_USER_WARNING);
+                return NULL;
             }
 
             if (socket_bind($sock, $this->address, $this->port) === false) {
                 trigger_error( "socket_bind() failed: " . socket_strerror(socket_last_error($sock)), E_USER_WARNING);
+                return NULL;
             }
 
             if (socket_listen($sock, static::SOCK_BACKLOG) === false) {
                 trigger_error( "socket_listen() failed: " . socket_strerror(socket_last_error($sock)), E_USER_WARNING);
+                return NULL;
             }
-            if($this->socket)
-                socket_getsockname($sock, $this->address, $this->port);
+            socket_getsockname($sock, $this->address, $this->port);
         }
         return is_resource($this->socket) ? true : false;
     }
