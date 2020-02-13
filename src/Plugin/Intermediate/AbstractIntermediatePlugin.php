@@ -81,32 +81,34 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
      * @param PluginManagementInterface $management
      */
     protected function trapNextCommand(PluginManagementInterface $management) {
-        $msgsock = socket_accept($this->socket);
-        if($msgsock) {
-            $buffer = "";
+        if(is_resource($this->socket)) {
+            $msgsock = socket_accept($this->socket);
+            if($msgsock) {
+                $buffer = "";
 
-            while ($out = socket_read($msgsock, static::SOCK_BUFFER_SIZE)) {
-                $buffer .= $out;
-                if(strlen($out) < static::SOCK_BUFFER_SIZE) {
-                    break;
+                while ($out = socket_read($msgsock, static::SOCK_BUFFER_SIZE)) {
+                    $buffer .= $out;
+                    if(strlen($out) < static::SOCK_BUFFER_SIZE) {
+                        break;
+                    }
                 }
+
+                $response = $this->doCommand($buffer, $management);
+
+                $len = strlen($response);
+                $total = 0;
+
+                while ($written = socket_write($msgsock, $response)) {
+                    if($written === false)
+                        break;
+                    $total += $written;
+                    if($total >= $len)
+                        break;
+                }
+
+                socket_close($msgsock);
+                return $buffer;
             }
-
-            $response = $this->doCommand($buffer, $management);
-
-            $len = strlen($response);
-            $total = 0;
-
-            while ($written = socket_write($msgsock, $response)) {
-                if($written === false)
-                    break;
-                $total += $written;
-                if($total >= $len)
-                    break;
-            }
-
-            socket_close($msgsock);
-            return $buffer;
         }
         return NULL;
     }
