@@ -169,6 +169,8 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
     {
         if($this->socket)
             socket_close($this->socket);
+        if(is_file($this->address))
+            unlink($this->address);
         $this->socket = NULL;
     }
 
