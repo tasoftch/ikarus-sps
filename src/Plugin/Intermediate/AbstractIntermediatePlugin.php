@@ -85,7 +85,7 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
         if($msgsock) {
             $buffer = "";
 
-            while ($out = socket_read($this->socket, static::SOCK_BUFFER_SIZE)) {
+            while ($out = socket_read($msgsock, static::SOCK_BUFFER_SIZE)) {
                 $buffer .= $out;
                 if(strlen($out) < static::SOCK_BUFFER_SIZE) {
                     break;
