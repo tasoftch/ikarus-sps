@@ -48,10 +48,13 @@ class CyclicIntermediatePlugin extends AbstractIntermediatePlugin implements Cyc
     const CMD_EXISTS_COMMAND = 'fe';
     const CMD_PUT_COMMAND = 'pc';
 
-    protected function establishConnection()
+    public function establishConnection()
     {
-        if(parent::establishConnection())
+        if(parent::establishConnection()) {
             socket_set_nonblock($this->socket);
+            return true;
+        }
+        return false;
     }
 
 
