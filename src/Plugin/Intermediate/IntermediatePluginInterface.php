@@ -67,4 +67,18 @@ interface IntermediatePluginInterface extends PluginInterface
      * @return int|null
      */
     public function getPort(): ?int;
+
+    /**
+     * This method should establish the server connection and update address and/or port
+     *
+     * @return bool
+     */
+    public function establishConnection();
+
+    /**
+     * Closes the server connection.
+     *
+     * @return bool
+     */
+    public function closeConnection();
 }

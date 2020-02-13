@@ -79,6 +79,7 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
      * This method can be called to simply accept an incoming connection, read its request and sends the SPS response back.
      *
      * @param PluginManagementInterface $management
+     * @return string|null
      */
     protected function trapNextCommand(PluginManagementInterface $management) {
         if(is_resource($this->socket)) {
@@ -138,9 +139,14 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
         return $this->startMessage;
     }
 
-    protected function establishConnection() {
-        if(!$this->socket) {
-            if (($this->socket = $sock = socket_create(NULL !== $this->getPort() ? AF_INET : AF_UNIX, SOCK_STREAM, SOL_TCP)) === false) {
+    public function establishConnection() {
+        if(NULL === $this->socket) {
+            if(NULL === $this->getPort())
+                $this->socket = $sock = socket_create(AF_UNIX, SOCK_STREAM, 0);
+            else
+                $this->socket = $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+
+            if ($sock === false) {
                 trigger_error( "socket_create() failed: " . socket_strerror(socket_last_error()), E_USER_WARNING);
                 return NULL;
             }
@@ -159,10 +165,16 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
         return is_resource($this->socket) ? true : false;
     }
 
-    public function tearDown()
+    public function closeConnection()
     {
         if($this->socket)
             socket_close($this->socket);
         $this->socket = NULL;
+    }
+
+
+    public function tearDown()
+    {
+        $this->closeConnection();
     }
 }
