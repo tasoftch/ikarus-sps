@@ -50,8 +50,8 @@ class CyclicIntermediatePlugin extends AbstractIntermediatePlugin implements Cyc
 
     protected function establishConnection()
     {
-        parent::establishConnection();
-        socket_set_nonblock($this->socket);
+        if(parent::establishConnection())
+            socket_set_nonblock($this->socket);
     }
 
 
