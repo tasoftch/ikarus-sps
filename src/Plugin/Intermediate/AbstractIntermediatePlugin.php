@@ -151,7 +151,8 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
             if (socket_listen($sock, static::SOCK_BACKLOG) === false) {
                 trigger_error( "socket_listen() failed: " . socket_strerror(socket_last_error($sock)), E_USER_WARNING);
             }
-            socket_getsockname($sock, $this->address, $this->port);
+            if($this->socket)
+                socket_getsockname($sock, $this->address, $this->port);
         }
         return is_resource($this->socket) ? true : false;
     }
