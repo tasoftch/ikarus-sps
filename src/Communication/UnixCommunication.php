@@ -58,12 +58,9 @@ class UnixCommunication extends AbstractCommunication
 
     protected function establishConnection()
     {
-        $socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
-        if($socket === 0)
-            throw new SocketException("Could not create tcp socket");
-        if(socket_connect($socket, $this->address) === false) {
-            $e = new SocketException("Can not connect to unix address $this->address");
-            $e->setSocket($socket);
+        $socket = fsockopen($this->getAddress(), NULL, $errorno, $errstr, $this->getTimeout());
+        if(!$socket) {
+            $e = new SocketException($errstr, $errorno);
             throw $e;
         }
         return $socket;
@@ -71,6 +68,6 @@ class UnixCommunication extends AbstractCommunication
 
     protected function closeConnection($socket)
     {
-        socket_close($socket);
+        fclose($socket);
     }
 }

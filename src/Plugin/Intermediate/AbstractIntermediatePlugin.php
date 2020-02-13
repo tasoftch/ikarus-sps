@@ -35,6 +35,7 @@
 namespace Ikarus\SPS\Plugin\Intermediate;
 
 
+use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Plugin\AbstractPlugin;
 use Ikarus\SPS\Plugin\Management\PluginManagementInterface;
 use Ikarus\SPS\Plugin\TearDownPluginInterface;
@@ -49,9 +50,12 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
     private $startMessage;
     /** @var resource */
     protected $socket;
+    private $_type;
 
     const SOCK_BACKLOG = 1;
     const SOCK_BUFFER_SIZE = 2048;
+
+    private $reuseAddress = false;
 
     /**
      * AbstractIntermediatePlugin constructor.
@@ -65,6 +69,25 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
         $this->port = $port;
         $this->startMessage = $startMessage;
     }
+
+    /**
+     * @return bool
+     */
+    public function reuseAddress(): bool
+    {
+        return $this->reuseAddress;
+    }
+
+    /**
+     * @param bool $reuseAddress
+     * @return static
+     */
+    public function setReuseAddress(bool $reuseAddress)
+    {
+        $this->reuseAddress = $reuseAddress;
+        return $this;
+    }
+
 
     /**
      * This method should handle any incoming commands onto the SPS.
@@ -141,24 +164,35 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
 
     public function establishConnection() {
         if(NULL === $this->socket) {
-            if(NULL === $this->getPort())
-                $this->socket = $sock = socket_create(AF_UNIX, SOCK_STREAM, 0);
-            else
-                $this->socket = $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+            if(NULL === $this->getPort()) {
+                $this->socket = $sock = @socket_create(AF_UNIX, SOCK_STREAM, 0);
+                $this->_type = 1;
+            }
+            else {
+                $this->socket = $sock = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+                $this->_type = 2;
+            }
 
             if ($sock === false) {
-                trigger_error( "socket_create() failed: " . socket_strerror(socket_last_error()), E_USER_WARNING);
-                return NULL;
+                throw new SPSException( "socket_create() failed: " . socket_strerror(socket_last_error()), socket_last_error());
             }
 
-            if (socket_bind($sock, $this->address, $this->port) === false) {
-                trigger_error( "socket_bind() failed: " . socket_strerror(socket_last_error($sock)), E_USER_WARNING);
-                return NULL;
+            if($this->reuseAddress()) {
+                socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
             }
 
-            if (socket_listen($sock, static::SOCK_BACKLOG) === false) {
-                trigger_error( "socket_listen() failed: " . socket_strerror(socket_last_error($sock)), E_USER_WARNING);
-                return NULL;
+            if (!@socket_bind($sock, $this->address, $this->port)) {
+                $c = socket_last_error($sock);
+                @$this->closeConnection();
+                $this->socket = false;
+                throw new SPSException( "socket_create() failed: " . socket_strerror($c) . " ($this->address)", $c);
+            }
+
+            if (!@socket_listen($sock, static::SOCK_BACKLOG)) {
+                $c = socket_last_error($sock);
+                @$this->closeConnection();
+                $this->socket = false;
+                throw new SPSException( "socket_listen() failed: " . socket_strerror($c), $c);
             }
             socket_getsockname($sock, $this->address, $this->port);
         }
@@ -167,11 +201,14 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
 
     public function closeConnection()
     {
-        if($this->socket)
+        if($this->_type == 1) {
             socket_close($this->socket);
-        if(is_file($this->address))
-            unlink($this->address);
+            unlink($this->getAddress());
+        } elseif ($this->_type == 2) {
+            socket_close($this->socket);
+        }
         $this->socket = NULL;
+        $this->_type = 0;
     }
 
 

@@ -59,13 +59,9 @@ class InternetProtocolCommunication extends UnixCommunication
 
     protected function establishConnection()
     {
-        $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if($socket === 0)
-            throw new SocketException("Could not create tcp socket");
-
-        if(socket_connect($socket, $this->getAddress(), $this->getPort()) === false) {
-            $e = new SocketException("Can not contact SPS. There might be a configuration error");
-            $e->setSocket($socket);
+        $socket = fsockopen($this->getAddress(), $this->getPort(), $errorno, $errstr, $this->getTimeout());
+        if(!$socket) {
+            $e = new SocketException($errstr, $errorno);
             throw $e;
         }
         return $socket;

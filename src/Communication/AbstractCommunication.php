@@ -96,48 +96,26 @@ abstract class AbstractCommunication implements CommunicationInterface
             throw $e;
         }
 
-        if(($to = $this->getTimeout()) > 0.1 ) {
-            $sec = floor($to);
-            $usec = $to - $sec;
-
-            socket_set_option($socket,SOL_SOCKET, SO_RCVTIMEO, [
-                "sec"=>$sec,
-                "usec"=>$usec
-            ]);
-        }
-
-
-        $e = function() use ($socket) {
-            $error = socket_last_error($socket);
+        $e = function() {
+            $error = error_get_last();
             if($error) {
-                $e = new CommunicationException(socket_strerror( $error ), $error);
-                $e->setSocket($socket);
+                $e = new CommunicationException($error["message"], $error["code"]);
                 throw $e;
             }
-            socket_clear_error($socket);
+            error_clear_last();
         };
 
         try {
-            $len = strlen($command);
-            $total = 0;
+            error_clear_last();
 
-            while ($written = socket_write($socket, $command)) {
-                if($written === false)
-                    break;
-                $total += $written;
-                if($total >= $len)
-                    break;
-            }
+            fwrite($socket, $command);
 
             $e();
 
             $buffer = "";
 
-            while ($out = socket_read($socket, static::SOCK_BUFFER_SIZE)) {
-                $buffer .= $out;
-                if(strlen($out) < static::SOCK_BUFFER_SIZE) {
-                    break;
-                }
+            while (!feof($socket)) {
+                $buffer .= fread($socket, static::SOCK_BUFFER_SIZE);
             }
 
             $e();
