@@ -35,6 +35,7 @@
 namespace Ikarus\SPS;
 
 use Ikarus\SPS\Exception\InterruptException;
+use Ikarus\SPS\Plugin\EngineDependentPluginInterface;
 use Ikarus\SPS\Plugin\InterruptPluginInterface;
 use Ikarus\SPS\Plugin\Management\PluginManagementInterface;
 use Ikarus\SPS\Plugin\PluginChildrenInterface;
@@ -188,6 +189,8 @@ abstract class AbstractEngine implements EngineInterface
         foreach($this->getPlugins() as $plugin) {
             if($plugin instanceof SetupPluginInterface)
                 $plugin->setup();
+            if($plugin instanceof EngineDependentPluginInterface)
+                $plugin->setEngine( $this );
         }
     }
 
@@ -207,6 +210,8 @@ abstract class AbstractEngine implements EngineInterface
         foreach($this->getPlugins() as $plugin) {
             if($plugin instanceof TearDownPluginInterface)
                 $plugin->tearDown();
+            if($plugin instanceof EngineDependentPluginInterface)
+                $plugin->setEngine( NULL );
         }
 
         if(is_callable($cb = $this->getCleanUpHandler()))
