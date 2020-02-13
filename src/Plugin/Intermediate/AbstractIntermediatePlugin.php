@@ -153,6 +153,7 @@ abstract class AbstractIntermediatePlugin extends AbstractPlugin implements Inte
             }
             socket_getsockname($sock, $this->address, $this->port);
         }
+        return is_resource($this->socket) ? true : false;
     }
 
     public function tearDown()
