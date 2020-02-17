@@ -61,7 +61,7 @@ class PersistentStoragePlugin extends AbstractCyclicPlugin
         $this->loadAtFirstLoop = $loadAtFirstLoop;
 
         foreach($persistentPropertyDomainsAndKeys as $domain => $keys) {
-            $this->persistentPropertyDomain[$domain] = array_merge( $this->persistentPropertyDomain[$domain] ?? [], $keys );
+            $this->persistentPropertyDomain[$domain] = array_merge( $this->persistentPropertyDomain[$domain] ?? [], $keys ?: [] );
         }
     }
 
@@ -74,7 +74,7 @@ class PersistentStoragePlugin extends AbstractCyclicPlugin
             if($s instanceof AtomicPersistentStorageInterface)
                 $s->openStorage();
             foreach ($this->persistentPropertyDomain as $domain => $keys) {
-                if($keys == NULL) {
+                if(!$keys) {
                     $values = $s->loadValue(NULL, $domain);
                     if(is_iterable($values)) {
                         foreach($values as $key => $value)
@@ -95,7 +95,7 @@ class PersistentStoragePlugin extends AbstractCyclicPlugin
             $s = $this->getStorage();
 
             foreach ($this->persistentPropertyDomain as $domain => $keys) {
-                if(NULL === $keys) {
+                if(!$keys) {
                     $values = $pluginManagement->fetchValue($domain);
                 } else {
                     $values = [];
