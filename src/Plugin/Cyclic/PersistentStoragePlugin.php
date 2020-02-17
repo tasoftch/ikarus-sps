@@ -74,9 +74,17 @@ class PersistentStoragePlugin extends AbstractCyclicPlugin
             if($s instanceof AtomicPersistentStorageInterface)
                 $s->openStorage();
             foreach ($this->persistentPropertyDomain as $domain => $keys) {
-                foreach($keys as $key) {
-                    $value = $s->loadValue($key, $domain);
-                    $pluginManagement->putValue($value, $key, $domain);
+                if($keys == NULL) {
+                    $values = $s->loadValue(NULL, $domain);
+                    if(is_iterable($values)) {
+                        foreach($values as $key => $value)
+                            $pluginManagement->putValue($value, $key, $domain);
+                    }
+                } else {
+                    foreach($keys as $key) {
+                        $value = $s->loadValue($key, $domain);
+                        $pluginManagement->putValue($value, $key, $domain);
+                    }
                 }
             }
         }

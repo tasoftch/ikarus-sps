@@ -69,6 +69,8 @@ class FileStorage implements AtomicPersistentStorageInterface
 
     public function loadValue($key, $domain)
     {
+        if(!$key)
+            return $this->data[$domain] ?? [];
         return $this->data[$domain][$key] ?? NULL;
     }
 

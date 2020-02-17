@@ -45,9 +45,11 @@ interface PersistentStorageInterface
     public function storeValue($value, $key, $domain);
 
     /**
-     * @param $key
-     * @param $domain
-     * @return mixed
+     * Loads the values from the storage. If key is NULL, this method should return all values of the given domain
+     *
+     * @param string|null $key
+     * @param string $domain
+     * @return mixed|array
      */
     public function loadValue($key, $domain);
 }
