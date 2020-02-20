@@ -39,7 +39,6 @@ use Ikarus\SPS\Alert\AlertInterface;
 use Ikarus\SPS\Exception\InterruptException;
 use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Helper\CyclicPluginManager;
-use Ikarus\SPS\Plugin\Alert\AbstractAlertPlugin;
 use Ikarus\SPS\Plugin\Cyclic\CyclicPluginInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
 use TASoft\Collection\PriorityCollection;
@@ -117,8 +116,7 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             return true;
         };
         $vi->tra = function(AlertInterface $alert) {
-            /** @var AbstractAlertPlugin $plugin */
-            foreach($this->getAlertHandlerPlugins() as $plugin) {
+            foreach($this->alertHandlerPlugins as $plugin) {
                 if($plugin->handleAlert($alert))
                     break;
             }

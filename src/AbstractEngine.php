@@ -35,7 +35,7 @@
 namespace Ikarus\SPS;
 
 use Ikarus\SPS\Exception\InterruptException;
-use Ikarus\SPS\Plugin\Alert\AbstractAlertPlugin;
+use Ikarus\SPS\Plugin\Alert\AlertPluginInterface;
 use Ikarus\SPS\Plugin\EngineDependentPluginInterface;
 use Ikarus\SPS\Plugin\InterruptPluginInterface;
 use Ikarus\SPS\Plugin\Management\PluginManagementInterface;
@@ -53,7 +53,7 @@ abstract class AbstractEngine implements EngineInterface
     protected $running = false;
     /** @var PriorityCollection */
     protected $plugins;
-    /** @var array */
+    /** @var AlertPluginInterface[] */
     protected $alertHandlerPlugins;
     /** @var PriorityCollection */
     protected $interruptionPlugins;
@@ -196,17 +196,9 @@ abstract class AbstractEngine implements EngineInterface
                 $plugin->setup();
             if($plugin instanceof EngineDependentPluginInterface)
                 $plugin->setEngine( $this );
-            if($plugin instanceof AbstractAlertPlugin)
+            if($plugin instanceof AlertPluginInterface)
                 $this->alertHandlerPlugins[] = $plugin;
         }
-    }
-
-    /**
-     * @return array
-     */
-    public function getAlertHandlerPlugins(): array
-    {
-        return $this->alertHandlerPlugins;
     }
 
     /**

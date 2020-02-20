@@ -34,7 +34,6 @@
 
 namespace Ikarus\SPS;
 
-use Ikarus\SPS\Plugin\Alert\AbstractAlertPlugin;
 use Ikarus\SPS\Plugin\PluginInterface;
 
 /**
@@ -51,11 +50,6 @@ interface EngineInterface
      * @return array|PluginInterface[]
      */
     public function getPlugins(): array;
-
-    /**
-     * @return array|AbstractAlertPlugin[]
-     */
-    public function getAlertHandlerPlugins(): array;
 
     /**
      * Runs the engine

@@ -39,7 +39,7 @@ use Ikarus\SPS\Alert\NoticeAlert;
 use Ikarus\SPS\Alert\WarningAlert;
 use Ikarus\SPS\Plugin\PluginInterface;
 
-class AlertLoggerPlugin extends AbstractAlertPlugin
+class AlertLoggerPlugin implements AlertPluginInterface
 {
     /** @var string */
     private $filename;

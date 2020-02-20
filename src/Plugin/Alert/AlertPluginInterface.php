@@ -36,17 +36,16 @@ namespace Ikarus\SPS\Plugin\Alert;
 
 
 use Ikarus\SPS\Alert\AlertInterface;
-use Ikarus\SPS\Plugin\AbstractPlugin;
 
 /**
- * Class AbstractAlertPlugin
+ * Interface AlertPluginInterface
  *
  * The alert plugins are different than the others!
  * They are invoked immediately when an alert is triggered.
  *
  * @package Ikarus\SPS\Plugin\Alert
  */
-abstract class AbstractAlertPlugin extends AbstractPlugin
+interface AlertPluginInterface
 {
     /**
      * Handles an alert
@@ -57,5 +56,5 @@ abstract class AbstractAlertPlugin extends AbstractPlugin
      * @param AlertInterface $alert
      * @return bool
      */
-    abstract public function handleAlert(AlertInterface $alert);
+    public function handleAlert(AlertInterface $alert);
 }
