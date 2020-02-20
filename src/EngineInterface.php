@@ -34,6 +34,9 @@
 
 namespace Ikarus\SPS;
 
+use Ikarus\SPS\Plugin\Alert\AbstractAlertPlugin;
+use Ikarus\SPS\Plugin\PluginInterface;
+
 /**
  * The Ikarus SPS Engine dispatches the plugins to separate processes (if needed) and handle a common gateway to let all plugins communicate between each other.
  * When the SPS Engine runs, it is controlling a machine or what ever.
@@ -45,9 +48,14 @@ interface EngineInterface
     /**
      * Gets all plugins to run
      *
-     * @return array
+     * @return array|PluginInterface[]
      */
     public function getPlugins(): array;
+
+    /**
+     * @return array|AbstractAlertPlugin[]
+     */
+    public function getAlertHandlerPlugins(): array;
 
     /**
      * Runs the engine

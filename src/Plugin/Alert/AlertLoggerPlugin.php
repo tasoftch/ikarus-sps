@@ -32,28 +32,53 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Management;
-
+namespace Ikarus\SPS\Plugin\Alert;
 
 use Ikarus\SPS\Alert\AlertInterface;
+use Ikarus\SPS\Alert\NoticeAlert;
+use Ikarus\SPS\Alert\WarningAlert;
+use Ikarus\SPS\Plugin\PluginInterface;
 
-interface PluginManagementInterface
+class AlertLoggerPlugin extends AbstractAlertPlugin
 {
-    /**
-     * Calling this method sends a stop signal to the sps and it will terminate.
-     * If the sps accepts the termination command, this method returns true, otherwise false.
-     * Note that the sps may deny stop instructions!
-     *
-     * @param int $code
-     * @param string $reason
-     * @return bool
-     */
-    public function stopEngine($code = 0, $reason = ""): bool;
+    /** @var string */
+    private $filename;
 
     /**
-     * Triggers an alert in the sps.
-     *
-     * @param AlertInterface $alert
+     * AlertLoggerPlugin constructor.
+     * @param string $filename
      */
-    public function triggerAlert(AlertInterface $alert);
+    public function __construct(string $filename)
+    {
+        $this->filename = $filename;
+    }
+
+
+    public function handleAlert(AlertInterface $alert)
+    {
+        $fh = fopen($this->getFilename(), 'a+');
+        $date = (new \DateTime())->format ("Y-m-d G:i:s.u");
+
+        if($alert instanceof NoticeAlert)
+            $error = "[$date] Notice ";
+        elseif($alert instanceof WarningAlert)
+            $error = "[$date] Warning ";
+        else
+            $error = "[$date] Error ";
+
+        $error .= sprintf("(%d)", $alert->getCode());
+        if($pl = $alert->getAffectedPlugin())
+            $error .= " <" . (( $pl instanceof PluginInterface ) ? $pl->getIdentifier() : (string)$pl) . "> ";
+        $error .= $alert->getMessage() . PHP_EOL;
+        fwrite($fh, $error);
+        fclose($fh);
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilename(): string
+    {
+        return $this->filename;
+    }
 }

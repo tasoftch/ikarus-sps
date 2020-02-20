@@ -37,6 +37,17 @@ namespace Ikarus\SPS\Alert;
 
 use Ikarus\SPS\Plugin\PluginInterface;
 
+/**
+ * Interface AlertInterface
+ *
+ * Alerts are information processes that can jump out of a normal sps process.
+ * There are three kinds of alerts:
+ * notice: The notice is designed just to be logged.
+ * warning: A warning should be visible to the user indicating that something might go wrong.
+ * critical: A critical alert must inform the user and he must decide how to continue.
+ *
+ * @package Ikarus\SPS\Alert
+ */
 interface AlertInterface
 {
     /**

@@ -32,28 +32,35 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Management;
+namespace Ikarus\SPS\Alert;
 
 
-use Ikarus\SPS\Alert\AlertInterface;
-
-interface PluginManagementInterface
+class RecoveryAlert extends CriticalAlert implements AlertRecoveryInterface
 {
-    /**
-     * Calling this method sends a stop signal to the sps and it will terminate.
-     * If the sps accepts the termination command, this method returns true, otherwise false.
-     * Note that the sps may deny stop instructions!
-     *
-     * @param int $code
-     * @param string $reason
-     * @return bool
-     */
-    public function stopEngine($code = 0, $reason = ""): bool;
+    /** @var callable */
+    protected $callback;
 
     /**
-     * Triggers an alert in the sps.
-     *
-     * @param AlertInterface $alert
+     * @return callable
      */
-    public function triggerAlert(AlertInterface $alert);
+    public function getCallback(): callable
+    {
+        return $this->callback;
+    }
+
+    /**
+     * @param callable $callback
+     * @return static
+     */
+    public function setCallback(callable $callback)
+    {
+        $this->callback = $callback;
+        return $this;
+    }
+
+
+    public function resume()
+    {
+        call_user_func( $this->getCallback() );
+    }
 }

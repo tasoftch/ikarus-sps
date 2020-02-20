@@ -35,12 +35,13 @@
 namespace Ikarus\SPS\Helper;
 
 
+use Ikarus\SPS\Alert\AlertInterface;
 use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 
 class CyclicPluginManager implements CyclicPluginManagementInterface
 {
     /** @var callable */
-    private $f, $rtf, $se;
+    private $f, $rtf, $se, $tra;
 
     private $commands = [];
     private $values = [];
@@ -103,5 +104,10 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
         if($key !== NULL)
             return $this->values[$domain][$key] ?? NULL;
         return $this->values[$domain] ?? NULL;
+    }
+
+    public function triggerAlert(AlertInterface $alert)
+    {
+        ($this->tra)($alert);
     }
 }

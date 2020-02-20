@@ -32,28 +32,13 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Management;
+namespace Ikarus\SPS\Alert;
 
 
-use Ikarus\SPS\Alert\AlertInterface;
-
-interface PluginManagementInterface
+interface AlertRecoveryInterface extends AlertInterface
 {
     /**
-     * Calling this method sends a stop signal to the sps and it will terminate.
-     * If the sps accepts the termination command, this method returns true, otherwise false.
-     * Note that the sps may deny stop instructions!
-     *
-     * @param int $code
-     * @param string $reason
-     * @return bool
+     * Calling this method on a recoverable alert tells the sps that the interrupted process can continue.
      */
-    public function stopEngine($code = 0, $reason = ""): bool;
-
-    /**
-     * Triggers an alert in the sps.
-     *
-     * @param AlertInterface $alert
-     */
-    public function triggerAlert(AlertInterface $alert);
+    public function resume();
 }

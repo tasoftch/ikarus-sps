@@ -32,28 +32,30 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Management;
+namespace Ikarus\SPS\Plugin\Alert;
 
 
 use Ikarus\SPS\Alert\AlertInterface;
+use Ikarus\SPS\Plugin\AbstractPlugin;
 
-interface PluginManagementInterface
+/**
+ * Class AbstractAlertPlugin
+ *
+ * The alert plugins are different than the others!
+ * They are invoked immediately when an alert is triggered.
+ *
+ * @package Ikarus\SPS\Plugin\Alert
+ */
+abstract class AbstractAlertPlugin extends AbstractPlugin
 {
     /**
-     * Calling this method sends a stop signal to the sps and it will terminate.
-     * If the sps accepts the termination command, this method returns true, otherwise false.
-     * Note that the sps may deny stop instructions!
+     * Handles an alert
      *
-     * @param int $code
-     * @param string $reason
-     * @return bool
-     */
-    public function stopEngine($code = 0, $reason = ""): bool;
-
-    /**
-     * Triggers an alert in the sps.
+     * If this plugins returns true, the sps will not handle further plugins.
+     *
      *
      * @param AlertInterface $alert
+     * @return bool
      */
-    public function triggerAlert(AlertInterface $alert);
+    abstract public function handleAlert(AlertInterface $alert);
 }
