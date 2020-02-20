@@ -32,7 +32,7 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin\Error;
+namespace Ikarus\SPS\Plugin\Trigger\Error;
 
 
 use Ikarus\SPS\Error\Deprecated;
