@@ -59,4 +59,9 @@ class AlertPrinterPlugin implements AlertPluginInterface
         $error .= $alert->getMessage() . "\033[0m" . PHP_EOL;
         echo $error;
     }
+
+    public function getIdentifier(): string
+    {
+        return "ikarus.logger.screen";
+    }
 }

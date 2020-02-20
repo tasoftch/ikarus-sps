@@ -36,6 +36,7 @@ namespace Ikarus\SPS\Plugin\Alert;
 
 
 use Ikarus\SPS\Alert\AlertInterface;
+use Ikarus\SPS\Plugin\PluginInterface;
 
 /**
  * Interface AlertPluginInterface
@@ -45,7 +46,7 @@ use Ikarus\SPS\Alert\AlertInterface;
  *
  * @package Ikarus\SPS\Plugin\Alert
  */
-interface AlertPluginInterface
+interface AlertPluginInterface extends PluginInterface
 {
     /**
      * Handles an alert

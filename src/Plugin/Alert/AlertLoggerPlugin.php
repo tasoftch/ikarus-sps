@@ -81,4 +81,9 @@ class AlertLoggerPlugin implements AlertPluginInterface
     {
         return $this->filename;
     }
+
+    public function getIdentifier(): string
+    {
+        return "ikarus.logger.file";
+    }
 }
