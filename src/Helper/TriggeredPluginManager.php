@@ -34,6 +34,7 @@
 
 namespace Ikarus\SPS\Helper;
 
+use Ikarus\SPS\Alert\AlertInterface;
 use Ikarus\SPS\Event\DispatchedEventInterface;
 use Ikarus\SPS\Event\DispatchedEventResponseInterface;
 use Ikarus\SPS\Event\ResponseEvent;
@@ -120,5 +121,10 @@ class TriggeredPluginManager implements TriggeredPluginManagementInterface
             }
         }
         return false;
+    }
+
+    public function triggerAlert(AlertInterface $alert)
+    {
+        // TODO: Implement triggerAlert() method.
     }
 }
