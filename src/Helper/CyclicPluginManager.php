@@ -62,7 +62,7 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
         return ($this->se)($code, $reason) ? true : false;
     }
 
-    public function putCommand(string $command, $info = NULL)
+    public function putCommand(string $command, $info = false)
     {
         $this->commands[$command] = $info;
     }
