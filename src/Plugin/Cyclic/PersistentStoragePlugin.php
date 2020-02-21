@@ -69,6 +69,7 @@ class PersistentStoragePlugin extends AbstractCyclicPlugin
     {
         if((!$this->_didLoad && $this->loadAtFirstLoop) || $pluginManagement->hasCommand( static::CMD_RELOAD )) {
             $pluginManagement->clearCommand( static::CMD_RELOAD );
+            $this->_didLoad = true;
 
             $s = $this->getStorage();
             if($s instanceof AtomicPersistentStorageInterface)
