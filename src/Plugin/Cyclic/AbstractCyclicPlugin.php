@@ -39,4 +39,24 @@ use Ikarus\SPS\Plugin\AbstractPlugin;
 
 abstract class AbstractCyclicPlugin extends AbstractPlugin implements CyclicPluginInterface
 {
+    /** @var string */
+    private $identifier;
+
+    /**
+     * AbstractCyclicPlugin constructor.
+     * @param string $identifier
+     */
+    public function __construct(string $identifier = NULL)
+    {
+        $this->identifier = NULL !== $identifier ? $identifier : parent::getIdentifier();
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
 }
