@@ -47,9 +47,11 @@ class StopEngineAfterCycleCountPlugin extends AbstractCyclicPlugin implements Se
     /**
      * StopEngineAfterCycleCountPlugin constructor.
      * @param int $count
+     * @param string|null $identifier
      */
-    public function __construct(int $count)
+    public function __construct(int $count, string $identifier = NULL)
     {
+        parent::__construct($identifier !== NULL ? $identifier : (string) $count);
         $this->count = $count;
     }
 

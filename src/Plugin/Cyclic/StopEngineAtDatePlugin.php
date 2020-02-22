@@ -46,9 +46,11 @@ class StopEngineAtDatePlugin extends AbstractCyclicPlugin
     /**
      * StopEngineAtDatePlugin constructor.
      * @param DateTime $date
+     * @param string|null $identifier
      */
-    public function __construct(DateTime $date)
+    public function __construct(DateTime $date, string $identifier = NULL)
     {
+        parent::__construct($identifier !== NULL ? $identifier : $date->format("Y-m-d G:i:s.u"));
         $this->date = $date;
     }
 

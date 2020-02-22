@@ -47,9 +47,11 @@ class StopEngineAfterIntervalPlugin extends AbstractCyclicPlugin implements Setu
     /**
      * StopEngineAfterIntervalPlugin constructor.
      * @param float $interval
+     * @param string|null $identifier
      */
-    public function __construct(float $interval)
+    public function __construct(float $interval, string $identifier = NULL)
     {
+        parent::__construct($identifier !== NULL ? $identifier : (string)$interval);
         $this->interval = $interval;
     }
 

@@ -52,11 +52,14 @@ class PersistentStoragePlugin extends AbstractCyclicPlugin
     /**
      * PersistentStoragePlugin constructor.
      * @param PersistentStorageInterface $storage
+     * @param string $identifier
      * @param bool $loadAtFirstLoop
-     * @param array $persistentPropertyKeys
+     * @param array $persistentPropertyDomainsAndKeys
      */
-    public function __construct(PersistentStorageInterface $storage, bool $loadAtFirstLoop = true, array $persistentPropertyDomainsAndKeys = [])
+    public function __construct(PersistentStorageInterface $storage, string $identifier, bool $loadAtFirstLoop = true, array $persistentPropertyDomainsAndKeys = [])
     {
+        parent::__construct($identifier);
+
         $this->storage = $storage;
         $this->loadAtFirstLoop = $loadAtFirstLoop;
 

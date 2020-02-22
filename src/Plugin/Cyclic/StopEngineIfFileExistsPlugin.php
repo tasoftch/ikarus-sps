@@ -19,9 +19,11 @@ class StopEngineIfFileExistsPlugin extends AbstractCyclicPlugin
     /**
      * StopEngineIfFileExistsPlugin constructor.
      * @param string $filename
+     * @param string|null $identifier
      */
-    public function __construct(string $filename)
+    public function __construct(string $filename, string $identifier = NULL)
     {
+        parent::__construct($identifier !== NULL ? $identifier : $filename);
         $this->filename = $filename;
     }
 
