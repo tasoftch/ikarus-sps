@@ -47,6 +47,9 @@ class FileStorage implements AtomicPersistentStorageInterface
     public function __construct($filename)
     {
         $this->filename = $filename;
+        if(!is_file($filename)) {
+            file_put_contents($filename, "<?php\nreturn [];");
+        }
     }
 
 
