@@ -175,7 +175,13 @@ abstract class AbstractEngine implements EngineInterface
         if(!$this->isRunning()) {
             $this->running = true;
             $this->setupEngine();
-            $this->exitCode = $this->runEngine();
+            try {
+                $this->exitCode = $this->runEngine();
+            } catch (\Throwable $throwable) {
+                $this->tearDownEngine();
+                throw $throwable;
+            }
+
         }
         return $this->exitCode;
     }
