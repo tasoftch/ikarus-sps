@@ -70,4 +70,9 @@ interface AlertInterface
      * @return string|PluginInterface|null
      */
     public function getAffectedPlugin();
+
+    /**
+     * @return int
+     */
+    public function getTimeStamp(): int;
 }

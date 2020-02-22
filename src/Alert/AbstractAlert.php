@@ -46,6 +46,9 @@ class AbstractAlert implements AlertInterface
     /** @var string|PluginInterface|null */
     private $affectedPlugin;
 
+    /** @var int */
+    private $timeStamp;
+
     /**
      * AbstractAlert constructor.
      * @param int $code
@@ -58,6 +61,7 @@ class AbstractAlert implements AlertInterface
         $this->code = $code;
         $this->message = vsprintf($message, $args);
         $this->affectedPlugin = $affectedPlugin;
+        $this->timeStamp = time();
     }
 
 
@@ -83,5 +87,13 @@ class AbstractAlert implements AlertInterface
     public function getAffectedPlugin()
     {
         return $this->affectedPlugin;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimeStamp(): int
+    {
+        return $this->timeStamp;
     }
 }
