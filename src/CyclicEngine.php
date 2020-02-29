@@ -41,6 +41,7 @@ use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Helper\CyclicPluginManager;
 use Ikarus\SPS\Plugin\Cyclic\CyclicPluginInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
+use Ikarus\SPS\Plugin\TearDownPluginInterface;
 use TASoft\Collection\PriorityCollection;
 use TASoft\Util\ValueInjector;
 
@@ -122,10 +123,28 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             }
         };
 
+        if(function_exists("pcntl_signal")) {
+            $handler = function() {
+                foreach($this->getPlugins() as $plugin) {
+                    if($plugin instanceof TearDownPluginInterface) {
+                        $plugin->tearDown();
+                    }
+                }
+                exit();
+            };
+
+            pcntl_signal(SIGTERM, $handler);
+            pcntl_signal(SIGINT, $handler);
+        }
+
+
         while ($this->isRunning()) {
             $waitFor = min(array_values($scheduler)) - microtime(true);
-            if($waitFor > 0)
-                usleep($waitFor * 1e6);
+            if($waitFor > 0) {
+                declare(ticks=1) {
+                    usleep($waitFor * 1e6);
+                }
+            }
 
             if(!$this->isRunning())
                 break;
