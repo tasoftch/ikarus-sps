@@ -52,6 +52,8 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
     /** @var PriorityCollection */
     private $cyclicPlugins;
 
+    public static $pluginManagementClassName = CyclicPluginManager::class;
+
 
     public function __construct(int $frequency = 2, $name = 'Ikarus SPS, (c) by TASoft Applications')
     {
@@ -82,6 +84,11 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
         $this->running = false;
     }
 
+    protected function makeCycliclPluginManager() {
+        $c = static::$pluginManagementClassName;
+        return new $c();
+    }
+
     function runEngine()
     {
         $scheduler = [];
@@ -97,7 +104,7 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             throw new SPSException("Engine does not have any plugin", 13);
         }
 
-        $manager = new CyclicPluginManager();
+        $manager = $this->makeCycliclPluginManager();
         $vi = new ValueInjector($manager, CyclicPluginManager::class);
         $vi->f = function() { return $this->getFrequency(); };
 
