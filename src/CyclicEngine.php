@@ -40,6 +40,7 @@ use Ikarus\SPS\Exception\InterruptException;
 use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Helper\CyclicPluginManager;
 use Ikarus\SPS\Plugin\Cyclic\CyclicPluginInterface;
+use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
 use Ikarus\SPS\Plugin\TearDownPluginInterface;
 use TASoft\Collection\PriorityCollection;
@@ -51,6 +52,8 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
     private $frequency;
     /** @var PriorityCollection */
     private $cyclicPlugins;
+
+    private $pluginManager;
 
     public static $pluginManagementClassName = CyclicPluginManager::class;
 
@@ -82,6 +85,21 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
 
         parent::stop();
         $this->running = false;
+    }
+
+    public function getPluginManager(): CyclicPluginManagementInterface
+    {
+        if(!$this->pluginManager)
+            $this->pluginManager = $this->makeCycliclPluginManager();
+        return $this->pluginManager;
+    }
+
+    /**
+     * @param CyclicPluginManagementInterface $pluginManager
+     */
+    public function setPluginManager(CyclicPluginManagementInterface $pluginManager): void
+    {
+        $this->pluginManager = $pluginManager;
     }
 
     protected function makeCycliclPluginManager() {

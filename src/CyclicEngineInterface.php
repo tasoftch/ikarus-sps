@@ -35,6 +35,8 @@
 namespace Ikarus\SPS;
 
 
+use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
+
 /**
  * Cyclic SPS engines are triggered automatically with a constant update frequency.
  * @package Ikarus\SPS
@@ -47,4 +49,9 @@ interface CyclicEngineInterface extends EngineInterface
      * @return int
      */
     public function getFrequency(): int;
+
+    /**
+     * @return CyclicPluginManagementInterface
+     */
+    public function getPluginManager(): CyclicPluginManagementInterface;
 }
