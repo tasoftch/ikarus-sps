@@ -121,4 +121,17 @@ interface CyclicPluginManagementInterface extends PluginManagementInterface
      * @return mixed
      */
     public function fetchValue($domain, $key = NULL);
+
+    /**
+     *
+     *
+     * @param PluginManagementObserverInterface $observer
+     * @param string $identifier
+     */
+    public function addObserver(PluginManagementObserverInterface $observer, string $identifier);
+
+    /**
+     * @param string|PluginManagementObserverInterface $observer
+     */
+    public function removeObserver($observer);
 }
