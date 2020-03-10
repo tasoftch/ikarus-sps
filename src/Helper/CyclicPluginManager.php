@@ -37,6 +37,7 @@ namespace Ikarus\SPS\Helper;
 
 use Ikarus\SPS\Alert\AlertInterface;
 use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
+use Ikarus\SPS\Plugin\Management\PluginManagementObserverInterface;
 
 class CyclicPluginManager implements CyclicPluginManagementInterface
 {
@@ -45,6 +46,8 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
 
     private $commands = [];
     private $values = [];
+
+    private $observers = [];
 
 
     public function getFrequency(): int
@@ -65,6 +68,10 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
     public function putCommand(string $command, $info = false)
     {
         $this->commands[$command] = $info;
+        $this->_triggerObserver([
+            PluginManagementObserverInterface::COMMAND_KEY => $command,
+            PluginManagementObserverInterface::VALUE_KEY => $info
+        ]);
     }
 
     public function hasCommand(string $command = NULL): bool
@@ -90,6 +97,12 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
             unset($this->values[$domain][$key]);
         else
             $this->values[$domain][$key] = $value;
+
+        $this->_triggerObserver([
+            PluginManagementObserverInterface::DOMAIN_KEY => $domain,
+            PluginManagementObserverInterface::KEY_KEY => $key,
+            PluginManagementObserverInterface::VALUE_KEY => $value
+        ]);
     }
 
     public function hasValue($domain, $key = NULL): bool
@@ -109,5 +122,30 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
     public function triggerAlert(AlertInterface $alert)
     {
         ($this->tra)($alert);
+        $this->_triggerObserver([
+            PluginManagementObserverInterface::ALERT_KEY => $alert
+        ]);
+    }
+
+    private function _triggerObserver(array $changes) {
+        /** @var PluginManagementObserverInterface $observer */
+        foreach($this->observers as $observer) {
+            if($observer->shouldTrigger($changes))
+                $observer->trigger($changes);
+        }
+    }
+
+    public function addObserver(PluginManagementObserverInterface $observer, string $identifier)
+    {
+        $this->observers[ $identifier ] = $observer;
+    }
+
+    public function removeObserver($observer)
+    {
+        if(is_string( $observer )) {
+            unset($this->observers[$observer]);
+        } elseif(($idx = array_search($observer, $this->observers)) !== false) {
+            unset($this->observers[$idx]);
+        }
     }
 }
