@@ -198,12 +198,12 @@ abstract class AbstractEngine implements EngineInterface
         $this->alertHandlerPlugins = [];
 
         foreach($this->getPlugins() as $plugin) {
-            if($plugin instanceof SetupPluginInterface)
-                $plugin->setup();
             if($plugin instanceof EngineDependentPluginInterface)
                 $plugin->setEngine( $this );
             if($plugin instanceof AlertPluginInterface)
                 $this->alertHandlerPlugins[] = $plugin;
+            if($plugin instanceof SetupPluginInterface)
+                $plugin->setup();
         }
     }
 
