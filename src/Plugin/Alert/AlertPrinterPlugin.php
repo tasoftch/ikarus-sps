@@ -60,6 +60,11 @@ class AlertPrinterPlugin implements AlertPluginInterface
         echo $error;
     }
 
+    public function recoverAlert($alert): bool
+    {
+        return false;
+    }
+
     public function getIdentifier(): string
     {
         return "ikarus.logger.screen";

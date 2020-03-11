@@ -36,6 +36,7 @@ namespace Ikarus\SPS\Plugin\Alert;
 
 use Ikarus\SPS\Alert\AlertInterface;
 use Ikarus\SPS\Alert\NoticeAlert;
+use Ikarus\SPS\Alert\RecoveryAlert;
 use Ikarus\SPS\Alert\WarningAlert;
 use Ikarus\SPS\Plugin\PluginInterface;
 
@@ -73,6 +74,12 @@ class AlertLoggerPlugin implements AlertPluginInterface
         fwrite($fh, $error);
         fclose($fh);
     }
+
+    public function recoverAlert($alert): bool
+    {
+        return false;
+    }
+
 
     /**
      * @return string

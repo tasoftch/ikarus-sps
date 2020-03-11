@@ -147,6 +147,12 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
                     break;
             }
         };
+        $vi->qra = function($alert) {
+            foreach($this->alertHandlerPlugins as $plugin) {
+                if($plugin->recoverAlert($alert))
+                    break;
+            }
+        };
 
         if(function_exists("pcntl_signal")) {
             $handler = function() {

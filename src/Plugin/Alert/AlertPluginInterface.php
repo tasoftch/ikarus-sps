@@ -36,6 +36,7 @@ namespace Ikarus\SPS\Plugin\Alert;
 
 
 use Ikarus\SPS\Alert\AlertInterface;
+use Ikarus\SPS\Alert\RecoveryAlert;
 use Ikarus\SPS\Plugin\PluginInterface;
 
 /**
@@ -58,4 +59,12 @@ interface AlertPluginInterface extends PluginInterface
      * @return bool
      */
     public function handleAlert(AlertInterface $alert);
+
+    /**
+     * Recovers a given alert or an id of an alert.
+     *
+     * @param RecoveryAlert|string $alert
+     * @return bool
+     */
+    public function recoverAlert($alert): bool;
 }
