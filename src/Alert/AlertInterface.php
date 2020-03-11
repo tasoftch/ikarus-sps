@@ -51,6 +51,13 @@ use Ikarus\SPS\Plugin\PluginInterface;
 interface AlertInterface
 {
     /**
+     * An alert identifier
+     *
+     * @return string|int
+     */
+    public function getID();
+
+    /**
      * Gets the alert code
      *
      * @return int

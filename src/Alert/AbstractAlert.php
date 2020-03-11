@@ -37,7 +37,7 @@ namespace Ikarus\SPS\Alert;
 
 use Ikarus\SPS\Plugin\PluginInterface;
 
-class AbstractAlert implements AlertInterface
+abstract class AbstractAlert implements AlertInterface
 {
     /** @var int */
     private $code;
@@ -48,6 +48,8 @@ class AbstractAlert implements AlertInterface
 
     /** @var int */
     private $timeStamp;
+
+    private $id;
 
     /**
      * AbstractAlert constructor.
@@ -95,5 +97,26 @@ class AbstractAlert implements AlertInterface
     public function getTimeStamp(): int
     {
         return $this->timeStamp;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * The alert id can only be set once!
+     *
+     * @param mixed $id
+     * @return static
+     */
+    public function setId($id)
+    {
+        if(!$this->id)
+            $this->id = $id;
+        return $this;
     }
 }
