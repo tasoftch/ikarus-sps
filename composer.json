@@ -1,7 +1,6 @@
 {
   "name": "ikarus/sps",
   "license": "BSD-3-Clause",
-  "minimum-stability": "dev",
   "authors": [
     {
       "name": "Thomas Abplanalp",
@@ -15,9 +14,9 @@
   },
   "require" : {
     "php": "^7.2",
-    "tasoft/event-manager": "dev-master",
-    "tasoft/process": "dev-master",
-    "tasoft/value-injector": "dev-master",
+    "tasoft/event-manager": "^1.0",
+    "tasoft/process": "^1.0",
+    "tasoft/value-injector": "^1.0",
     "ext-sockets": "*",
     "ext-pcntl": "*",
     "ext-posix": "*"
