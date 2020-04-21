@@ -1,7 +1,7 @@
 {
   "name": "ikarus/sps",
   "license": "BSD-3-Clause",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "authors": [
     {
       "name": "Thomas Abplanalp",
