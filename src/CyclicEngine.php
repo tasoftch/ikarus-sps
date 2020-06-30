@@ -155,8 +155,11 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
         };
 
         if(function_exists("pcntl_signal")) {
-            $handler = function() {
+            $handler = function() use ($manager) {
                 $this->tearDownEngine();
+                if(method_exists($manager, 'tearDown'))
+                	$manager->tearDown();
+                exit();
             };
 
             pcntl_signal(SIGTERM, $handler);
@@ -189,6 +192,8 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
                 }
             }
         }
+		if(method_exists($manager, 'tearDown'))
+			$manager->tearDown();
     }
 
 
