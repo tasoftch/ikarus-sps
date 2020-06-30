@@ -42,7 +42,6 @@ use Ikarus\SPS\Helper\CyclicPluginManager;
 use Ikarus\SPS\Plugin\Cyclic\CyclicPluginInterface;
 use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
-use Ikarus\SPS\Plugin\TearDownPluginInterface;
 use TASoft\Collection\PriorityCollection;
 use TASoft\Util\ValueInjector;
 
