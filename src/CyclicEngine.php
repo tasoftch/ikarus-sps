@@ -122,7 +122,7 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             throw new SPSException("Engine does not have any plugin", 13);
         }
 
-        $manager = $this->makeCycliclPluginManager();
+        $manager = $this->getPluginManager();
         $vi = new ValueInjector($manager, CyclicPluginManager::class);
         $vi->f = function() { return $this->getFrequency(); };
 
