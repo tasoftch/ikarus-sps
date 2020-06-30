@@ -156,12 +156,7 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
 
         if(function_exists("pcntl_signal")) {
             $handler = function() {
-                foreach($this->getPlugins() as $plugin) {
-                    if($plugin instanceof TearDownPluginInterface) {
-                        $plugin->tearDown();
-                    }
-                }
-                exit();
+                $this->tearDownEngine();
             };
 
             pcntl_signal(SIGTERM, $handler);
