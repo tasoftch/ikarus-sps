@@ -165,6 +165,8 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             pcntl_signal(SIGINT, $handler);
         }
 
+		if(method_exists($manager, 'setup'))
+			$manager->setup();
 
         while ($this->isRunning()) {
             $waitFor = min(array_values($scheduler)) - microtime(true);
@@ -177,19 +179,23 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             if(!$this->isRunning())
                 break;
 
-            foreach($this->cyclicPlugins->getOrderedElements() as $plugin) {
+			$manager->beginCycle();
+			foreach($this->cyclicPlugins->getOrderedElements() as $plugin) {
                 if($scheduler[$plugin->getIdentifier()] < microtime(true)) {
                     $schedule( $this->getFrequency() );
                     try {
                         $plugin->update($manager);
                     } catch (InterruptException $exception) {
-                        if(!$this->handleInterruption($exception, $manager))
-                            throw $exception;
+                        if(!$this->handleInterruption($exception, $manager)) {
+                        	$manager->leaveCycle();
+							throw $exception;
+						}
                     }
                     if(!$this->isRunning())
                         break;
                 }
             }
+			$manager->leaveCycle();
         }
 		if(method_exists($manager, 'tearDown'))
 			$manager->tearDown();
