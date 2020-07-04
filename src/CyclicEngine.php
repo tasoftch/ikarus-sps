@@ -40,6 +40,7 @@ use Ikarus\SPS\Exception\InterruptException;
 use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Helper\CyclicPluginManager;
 use Ikarus\SPS\Plugin\Cyclic\CyclicPluginInterface;
+use Ikarus\SPS\Plugin\Cyclic\UpdateOncePluginInterface;
 use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
 use TASoft\Collection\PriorityCollection;
@@ -168,6 +169,8 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
 		if(method_exists($manager, 'setup'))
 			$manager->setup();
 
+		$once = true;
+
         while ($this->isRunning()) {
             $waitFor = min(array_values($scheduler)) - microtime(true);
             if($waitFor > 0) {
@@ -181,6 +184,9 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
 
 			$manager->beginCycle();
 			foreach($this->cyclicPlugins->getOrderedElements() as $plugin) {
+				if($once && $plugin instanceof UpdateOncePluginInterface)
+					$plugin->updateOnce($manager);
+
                 if($scheduler[$plugin->getIdentifier()] < microtime(true)) {
                     $schedule( $this->getFrequency() );
                     try {
@@ -195,6 +201,7 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
                         break;
                 }
             }
+			$once = false;
 			$manager->leaveCycle();
         }
 		if(method_exists($manager, 'tearDown'))
