@@ -36,7 +36,6 @@ namespace Ikarus\SPS\Helper;
 
 
 use Ikarus\SPS\Alert\AlertInterface;
-use Ikarus\SPS\Alert\RecoveryAlert;
 use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 use Ikarus\SPS\Plugin\Management\PluginManagementObserverInterface;
 
@@ -160,4 +159,12 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
             unset($this->observers[$idx]);
         }
     }
+
+	public function beginCycle()
+	{
+	}
+
+	public function leaveCycle()
+	{
+	}
 }

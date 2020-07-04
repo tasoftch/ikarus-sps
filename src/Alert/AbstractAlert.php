@@ -63,7 +63,7 @@ abstract class AbstractAlert implements AlertInterface
         $this->code = $code;
         $this->message = vsprintf($message, $args);
         $this->affectedPlugin = $affectedPlugin;
-        $this->timeStamp = time();
+        $this->timeStamp = (new \DateTime("now"))->getTimestamp();
     }
 
 
