@@ -39,4 +39,16 @@ class DomainObserver extends AbstractCallbackObserver implements PluginManagemen
     {
         return (isset($changes[ self::DOMAIN_KEY ]) && $changes[self::DOMAIN_KEY] == $this->getDomain());
     }
+
+	public function addObserver(PluginManagementObserverInterface $observer, string $identifier)
+	{
+		// TODO: Implement addObserver() method.
+	}
+
+	public function removeObserver($observer)
+	{
+		// TODO: Implement removeObserver() method.
+	}
+
+
 }
