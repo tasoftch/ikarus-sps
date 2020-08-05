@@ -51,6 +51,8 @@ abstract class AbstractAlert implements AlertInterface
 
     private $id;
 
+    public static $alarmCounter = 1;
+
     /**
      * AbstractAlert constructor.
      * @param int $code
@@ -104,6 +106,8 @@ abstract class AbstractAlert implements AlertInterface
      */
     public function getId()
     {
+        if(!$this->id)
+            $this->id = static::$alarmCounter++;
         return $this->id;
     }
 
