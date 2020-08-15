@@ -57,7 +57,11 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
 
     public static $pluginManagementClassName = CyclicPluginManager::class;
 
-
+    /**
+     * CyclicEngine constructor.
+     * @param int $frequency
+     * @param string $name
+     */
     public function __construct(int $frequency = 2, $name = 'Ikarus SPS, (c) by TASoft Applications')
     {
         parent::__construct($name);
@@ -65,6 +69,11 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
         $this->cyclicPlugins = new PriorityCollection();
     }
 
+    /**
+     * @param PluginInterface $plugin
+     * @param int $priority
+     * @return bool
+     */
     protected function shouldAddPlugin(PluginInterface $plugin, int $priority): bool
     {
         if($plugin instanceof CyclicPluginInterface)
@@ -72,12 +81,20 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
         return parent::shouldAddPlugin($plugin, $priority);
     }
 
+    /**
+     * @param PluginInterface $plugin
+     * @return bool
+     */
     protected function willRemovePlugin(PluginInterface $plugin): bool
     {
         $this->cyclicPlugins->remove($plugin);
         return parent::willRemovePlugin($plugin);
     }
 
+    /**
+     * @param int $code
+     * @param string $reason
+     */
     public function stop($code = 0, $reason = "")
     {
         $this->exitCode = $code;
@@ -87,6 +104,9 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
         $this->running = false;
     }
 
+    /**
+     * @return CyclicPluginManagementInterface
+     */
     public function getPluginManager(): CyclicPluginManagementInterface
     {
         if(!$this->pluginManager)
@@ -102,11 +122,19 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
         $this->pluginManager = $pluginManager;
     }
 
+    /**
+     * This method gets called once to create a plugin management if nothing was set during the initial procedure.
+     *
+     * @return CyclicPluginManagementInterface
+     */
     protected function makeCycliclPluginManager() {
         $c = static::$pluginManagementClassName;
         return new $c();
     }
 
+    /**
+     * @inheritDoc
+     */
     function runEngine()
     {
         $scheduler = [];
