@@ -12,6 +12,7 @@ class CallbackCyclicPlugin extends AbstractCyclicPlugin
 
     /**
      * CallbackCyclicPlugin constructor.
+     * @param string $identifier
      * @param callable $callback
      */
     public function __construct(string $identifier, callable $callback)

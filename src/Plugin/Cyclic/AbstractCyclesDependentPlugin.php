@@ -40,7 +40,7 @@ use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 abstract class AbstractCyclesDependentPlugin extends AbstractCyclicPlugin
 {
 	/** @var int */
-	private $cycleInterval = 1;
+	private $cycleInterval;
 	private $_current = 0;
 
 	/**

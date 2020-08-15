@@ -9,8 +9,6 @@
 namespace Ikarus\SPS\Plugin\Management\Observer;
 
 
-use Ikarus\SPS\Plugin\Management\PluginManagementObserverInterface;
-
 abstract class AbstractCallbackObserver
 {
     /** @var callable */

@@ -44,7 +44,7 @@ abstract class AbstractCyclicPlugin extends AbstractPlugin implements CyclicPlug
 
     /**
      * AbstractCyclicPlugin constructor.
-     * @param string $identifier
+     * @param string|null $identifier
      */
     public function __construct(string $identifier = NULL)
     {

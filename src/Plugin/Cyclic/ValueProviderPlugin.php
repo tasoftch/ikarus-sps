@@ -41,7 +41,7 @@ use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 
 class ValueProviderPlugin extends AbstractCyclicPlugin
 {
-	private $values = [];
+	private $values;
 	private $domain;
 
 	/**
