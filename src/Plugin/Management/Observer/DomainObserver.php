@@ -8,10 +8,7 @@
 
 namespace Ikarus\SPS\Plugin\Management\Observer;
 
-
-use Ikarus\SPS\Plugin\Management\PluginManagementObserverInterface;
-
-class DomainObserver extends AbstractCallbackObserver implements PluginManagementObserverInterface
+class DomainObserver extends AbstractCallbackObserver
 {
     /** @var string */
     private $domain;
@@ -39,16 +36,4 @@ class DomainObserver extends AbstractCallbackObserver implements PluginManagemen
     {
         return (isset($changes[ self::DOMAIN_KEY ]) && $changes[self::DOMAIN_KEY] == $this->getDomain());
     }
-
-	public function addObserver(PluginManagementObserverInterface $observer, string $identifier)
-	{
-		// TODO: Implement addObserver() method.
-	}
-
-	public function removeObserver($observer)
-	{
-		// TODO: Implement removeObserver() method.
-	}
-
-
 }

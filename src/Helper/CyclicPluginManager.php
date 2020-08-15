@@ -34,15 +34,13 @@
 
 namespace Ikarus\SPS\Helper;
 
-
-use Ikarus\SPS\Alert\AlertInterface;
 use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 use Ikarus\SPS\Plugin\Management\PluginManagementObserverInterface;
 
 class CyclicPluginManager implements CyclicPluginManagementInterface
 {
     /** @var callable */
-    private $f, $rtf, $se, $tra, $qra;
+    private $f, $rtf, $se;
 
     private $commands = [];
     private $values = [];
@@ -118,25 +116,6 @@ class CyclicPluginManager implements CyclicPluginManagementInterface
             return $this->values[$domain][$key] ?? NULL;
         return $this->values[$domain] ?? NULL;
     }
-
-    public function triggerAlert(AlertInterface $alert)
-    {
-        ($this->tra)($alert);
-        $this->_triggerObserver([
-            PluginManagementObserverInterface::ALERT_KEY => $alert
-        ]);
-    }
-
-    public function recoverAlert($alert): bool
-    {
-        $ok = ($this->qra)($alert) ? true : false;
-        $this->_triggerObserver([
-            PluginManagementObserverInterface::ALERT_KEY => $alert,
-            PluginManagementObserverInterface::COMMAND_KEY => 'recover'
-        ]);
-        return $ok;
-    }
-
 
     private function _triggerObserver(array $changes) {
         /** @var PluginManagementObserverInterface $observer */

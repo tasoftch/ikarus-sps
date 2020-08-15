@@ -35,9 +35,6 @@
 namespace Ikarus\SPS\Plugin\Management;
 
 
-use Ikarus\SPS\Alert\AlertInterface;
-use Ikarus\SPS\Alert\RecoveryAlert;
-
 interface PluginManagementInterface
 {
     /**
@@ -52,17 +49,15 @@ interface PluginManagementInterface
     public function stopEngine($code = 0, $reason = ""): bool;
 
     /**
-     * Triggers an alert in the sps.
      *
-     * @param AlertInterface $alert
+     *
+     * @param PluginManagementObserverInterface $observer
+     * @param string $identifier
      */
-    public function triggerAlert(AlertInterface $alert);
+    public function addObserver(PluginManagementObserverInterface $observer, string $identifier);
 
     /**
-     * Recovers an alert
-     *
-     * @param RecoveryAlert|string $alert
-     * @return bool
+     * @param string|PluginManagementObserverInterface $observer
      */
-    public function recoverAlert($alert): bool;
+    public function removeObserver($observer);
 }

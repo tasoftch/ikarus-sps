@@ -34,8 +34,6 @@
 
 namespace Ikarus\SPS;
 
-
-use Ikarus\SPS\Alert\AlertInterface;
 use Ikarus\SPS\Exception\InterruptException;
 use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Helper\CyclicPluginManager;
@@ -168,18 +166,6 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
         $vi->se = function($c, $r) {
             $this->stop($c, $r);
             return true;
-        };
-        $vi->tra = function(AlertInterface $alert) {
-            foreach($this->alertHandlerPlugins as $plugin) {
-                if($plugin->handleAlert($alert))
-                    break;
-            }
-        };
-        $vi->qra = function($alert) {
-            foreach($this->alertHandlerPlugins as $plugin) {
-                if($plugin->recoverAlert($alert))
-                    break;
-            }
         };
 
         if(function_exists("pcntl_signal")) {

@@ -35,7 +35,6 @@
 namespace Ikarus\SPS;
 
 use Ikarus\SPS\Exception\InterruptException;
-use Ikarus\SPS\Plugin\Alert\AlertPluginInterface;
 use Ikarus\SPS\Plugin\EngineDependentPluginInterface;
 use Ikarus\SPS\Plugin\InterruptPluginInterface;
 use Ikarus\SPS\Plugin\Management\PluginManagementInterface;
@@ -53,8 +52,6 @@ abstract class AbstractEngine implements EngineInterface
     protected $running = false;
     /** @var PriorityCollection */
     protected $plugins;
-    /** @var AlertPluginInterface[] */
-    protected $alertHandlerPlugins;
     /** @var PriorityCollection */
     protected $interruptionPlugins;
     /** @var callable|null */
@@ -209,13 +206,9 @@ abstract class AbstractEngine implements EngineInterface
      * Internal call to setup engine
      */
     protected function setupEngine() {
-        $this->alertHandlerPlugins = [];
-
         foreach($this->getPlugins() as $plugin) {
             if($plugin instanceof EngineDependentPluginInterface)
                 $plugin->setEngine( $this );
-            if($plugin instanceof AlertPluginInterface)
-                $this->alertHandlerPlugins[] = $plugin;
             if($plugin instanceof SetupPluginInterface)
                 $plugin->setup();
         }

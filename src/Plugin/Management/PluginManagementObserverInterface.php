@@ -22,19 +22,6 @@ interface PluginManagementObserverInterface
     const ALERT_KEY = 'alert';
     const COMMAND_KEY = 'command';
 
-	/**
-	 *
-	 *
-	 * @param PluginManagementObserverInterface $observer
-	 * @param string $identifier
-	 */
-	public function addObserver(PluginManagementObserverInterface $observer, string $identifier);
-
-	/**
-	 * @param string|PluginManagementObserverInterface $observer
-	 */
-	public function removeObserver($observer);
-
     /**
      * Triggered by the management on a change that affects the observer
      *
