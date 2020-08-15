@@ -66,12 +66,23 @@ abstract class AbstractEngine implements EngineInterface
     const RUNLOOP_CONTINUE = 1;
     const RUNLOOP_STOP_ENGINE = 2;
 
+    /** @var AbstractEngine|null */
+    private static $runningEngine;
+
     public function __construct($name = 'Ikarus SPS, (c) by TASoft Applications')
     {
         $this->plugins = new PriorityCollection();
         $this->interruptionPlugins = new PriorityCollection();
 
         $this->name = $name;
+    }
+
+    /**
+     * @return AbstractEngine|null
+     */
+    public static function getRunningEngine(): ?AbstractEngine
+    {
+        return self::$runningEngine;
     }
 
     /**
@@ -164,6 +175,7 @@ abstract class AbstractEngine implements EngineInterface
         if($this->isRunning()) {
             $this->tearDownEngine();
             $this->running = false;
+            self::$runningEngine = NULL;
         }
     }
 
@@ -174,6 +186,8 @@ abstract class AbstractEngine implements EngineInterface
     {
         if(!$this->isRunning()) {
             $this->running = true;
+            self::$runningEngine = $this;
+
             $this->setupEngine();
             try {
                 $this->exitCode = $this->runEngine();
