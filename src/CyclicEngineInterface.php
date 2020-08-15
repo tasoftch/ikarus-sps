@@ -53,5 +53,5 @@ interface CyclicEngineInterface extends EngineInterface
     /**
      * @return CyclicPluginManagementInterface
      */
-    public function getPluginManager(): CyclicPluginManagementInterface;
+    public function getPluginManager();
 }

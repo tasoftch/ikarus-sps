@@ -34,6 +34,7 @@
 
 namespace Ikarus\SPS;
 
+use Ikarus\SPS\Plugin\Management\PluginManagementInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
 
 /**
@@ -67,4 +68,9 @@ interface EngineInterface
      * Stops the engine
      */
     public function stop();
+
+    /**
+     * @return PluginManagementInterface
+     */
+    public function getPluginManager();
 }
