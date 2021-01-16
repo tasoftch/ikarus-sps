@@ -32,13 +32,45 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\StopEngine;
 
+use Ikarus\SPS\Plugin\AbstractPlugin;
+use Ikarus\SPS\Register\MemoryRegisterInterface;
 
-interface SetupPluginInterface
+class StopEngineAfterIntervalPlugin extends AbstractPlugin
 {
+    /** @var float */
+    private $interval;
+    private $_startTS;
+
     /**
-     * This method gets called before Ikarus SPS will start.
+     * StopEngineAfterIntervalPlugin constructor.
+     * @param float $interval
+     * @param string|null $identifier
      */
-    public function setup();
+    public function __construct(string $identifier = NULL, float $interval = 1.0)
+    {
+        parent::__construct($identifier !== NULL ? $identifier : (string)$interval);
+        $this->interval = $interval;
+    }
+
+    public function initialize(MemoryRegisterInterface $memoryRegister)
+	{
+		$this->_startTS = microtime(true);
+	}
+
+    public function update(MemoryRegisterInterface $memoryRegister)
+    {
+        $diff = microtime(true) - $this->_startTS;
+        if($diff >= $this->getInterval())
+            $memoryRegister->stopEngine(-16, 'Stop engine time up service');
+    }
+
+    /**
+     * @return float
+     */
+    public function getInterval(): float
+    {
+        return $this->interval;
+    }
 }

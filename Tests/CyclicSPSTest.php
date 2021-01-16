@@ -41,11 +41,11 @@
 
 use Ikarus\SPS\CyclicEngine;
 use Ikarus\SPS\Plugin\AbstractPlugin;
-use Ikarus\SPS\Plugin\Cyclic\CyclicPluginInterface;
-use Ikarus\SPS\Plugin\Cyclic\StopEngineAfterCycleCountPlugin;
-use Ikarus\SPS\Plugin\Cyclic\StopEngineAfterIntervalPlugin;
-use Ikarus\SPS\Plugin\Cyclic\StopEngineAtDatePlugin;
-use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
+use Ikarus\SPS\Plugin\PluginInterface;
+use Ikarus\SPS\Plugin\StopEngine\StopEngineAfterCycleCountPlugin;
+use Ikarus\SPS\Plugin\StopEngine\StopEngineAfterIntervalPlugin;
+use Ikarus\SPS\Plugin\StopEngine\StopEngineAtDatePlugin;
+use Ikarus\SPS\Register\MemoryRegisterInterface;
 use PHPUnit\Framework\TestCase;
 
 class CyclicSPSTest extends TestCase
@@ -54,7 +54,7 @@ class CyclicSPSTest extends TestCase
         $sps = new CyclicEngine(4);
 
         $sps->addPlugin(new StopEngineAfterIntervalPlugin(1));
-        $sps->addPlugin($pl = new MyPlugin());
+        $sps->addPlugin($pl = new MyPlugin('test'));
 
         $sps->run();
 
@@ -65,69 +65,29 @@ class CyclicSPSTest extends TestCase
         $sps = new CyclicEngine(4);
 
         $sps->addPlugin(new StopEngineAtDatePlugin(new DateTime("now +1second")));
-        $sps->addPlugin($pl = new MyPlugin());
+        $sps->addPlugin($pl = new MyPlugin('test'));
 
         $sps->run();
 
         $this->assertEquals(4, $pl->count);
     }
 
-    public function testDifferentFrequencies() {
-        $sps = new CyclicEngine(4);
-
-        $sps->addPlugin(new StopEngineAfterIntervalPlugin(1));
-        $sps->addPlugin($pl = new MyPlugin());
-        $sps->addPlugin($pl8 = new My8Plugin());
-        $sps->addPlugin($pl20 = new My20Plugin());
-        $sps->addPlugin($pl50 = new My50Plugin());
-
-        $sps->run();
-
-        $this->assertEquals(4, $pl->count);
-        $this->assertEquals(8, $pl8->count);
-        $this->assertEquals(20, $pl20->count);
-        $this->assertTrue($pl50->count >= 45 && $pl50->count <= 50);
-    }
 
     public function testCycleCounter() {
         $sps = new CyclicEngine(4);
 
         $sps->addPlugin(new StopEngineAfterCycleCountPlugin(3));
-        $sps->addPlugin($pl = new MyPlugin());
+        $sps->addPlugin($pl = new MyPlugin('test'));
 
         $sps->run();
         $this->assertEquals(3, $pl->count);
     }
 }
 
-class MyPlugin extends AbstractPlugin implements CyclicPluginInterface {
+class MyPlugin extends AbstractPlugin implements PluginInterface {
     public $count = 0;
-    public function update(CyclicPluginManagementInterface $pluginManagement)
+    public function update(MemoryRegisterInterface $memoryRegister)
     {
         $this->count++;
-    }
-}
-
-class My8Plugin extends MyPlugin {
-    public function update(CyclicPluginManagementInterface $pluginManagement)
-    {
-        parent::update($pluginManagement);
-        $pluginManagement->requireTemporaryFrequency(8);
-    }
-}
-
-class My20Plugin extends MyPlugin {
-    public function update(CyclicPluginManagementInterface $pluginManagement)
-    {
-        parent::update($pluginManagement);
-        $pluginManagement->requireTemporaryFrequency(20);
-    }
-}
-
-class My50Plugin extends MyPlugin {
-    public function update(CyclicPluginManagementInterface $pluginManagement)
-    {
-        parent::update($pluginManagement);
-        $pluginManagement->requireTemporaryFrequency(50);
     }
 }

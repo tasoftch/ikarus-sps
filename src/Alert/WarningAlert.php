@@ -32,13 +32,16 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Alert;
 
-
-interface SetupPluginInterface
+/**
+ * Class WarningAlert tells Ikarus SPS that it should inform the user but not yet do anything else.
+ * @package Ikarus\SPS\Alert
+ */
+class WarningAlert extends AbstractAlert
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+	public function getLevel(): int
+	{
+		return self::ALERT_LEVEL_WARNING;
+	}
 }

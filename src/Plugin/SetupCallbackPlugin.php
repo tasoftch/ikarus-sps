@@ -35,10 +35,16 @@
 namespace Ikarus\SPS\Plugin;
 
 
-interface SetupPluginInterface
+use Ikarus\SPS\Register\MemoryRegisterInterface;
+
+class SetupCallbackPlugin extends CallbackCyclicPlugin implements SetupPluginInterface
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+	public function update(MemoryRegisterInterface $memoryRegister)
+	{
+	}
+
+	public function setup()
+    {
+        call_user_func( $this->getCallback() );
+    }
 }

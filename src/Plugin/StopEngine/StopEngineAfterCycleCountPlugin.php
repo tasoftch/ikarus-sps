@@ -32,13 +32,46 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\StopEngine;
 
 
-interface SetupPluginInterface
+use Ikarus\SPS\Plugin\AbstractPlugin;
+use Ikarus\SPS\Register\MemoryRegisterInterface;
+
+class StopEngineAfterCycleCountPlugin extends AbstractPlugin
 {
+    /** @var int */
+    private $count;
+    private $_counter;
+
     /**
-     * This method gets called before Ikarus SPS will start.
+     * StopEngineAfterCycleCountPlugin constructor.
+     * @param int $count
+     * @param string|null $identifier
      */
-    public function setup();
+    public function __construct(string $identifier = NULL, int $count = 1)
+    {
+        parent::__construct($identifier !== NULL ? $identifier : (string) $count);
+        $this->count = $count;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCount(): int
+    {
+        return $this->count;
+    }
+
+    public function update(MemoryRegisterInterface $memoryRegister)
+    {
+        $this->_counter++;
+        if($this->getCount() < $this->_counter)
+            $memoryRegister->stopEngine(-18, "Stop engine cycle count service");
+    }
+
+    public function initialize(MemoryRegisterInterface $memoryRegister)
+    {
+        $this->_counter = 0;
+    }
 }

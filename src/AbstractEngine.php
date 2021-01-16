@@ -34,14 +34,14 @@
 
 namespace Ikarus\SPS;
 
-use Ikarus\SPS\Exception\InterruptException;
-use Ikarus\SPS\Plugin\EngineDependentPluginInterface;
-use Ikarus\SPS\Plugin\InterruptPluginInterface;
-use Ikarus\SPS\Plugin\Management\PluginManagementInterface;
-use Ikarus\SPS\Plugin\PluginChildrenInterface;
+use Ikarus\SPS\AlertManager\AlertManagerInterface;
+use Ikarus\SPS\AlertManager\DefaultAlertManager;
+use Ikarus\SPS\Exception\ImmutableSPSException;
 use Ikarus\SPS\Plugin\PluginInterface;
 use Ikarus\SPS\Plugin\SetupPluginInterface;
 use Ikarus\SPS\Plugin\TearDownPluginInterface;
+use Ikarus\SPS\Register\InternalMemoryRegister;
+use Ikarus\SPS\Register\MemoryRegisterInterface;
 use TASoft\Collection\PriorityCollection;
 
 abstract class AbstractEngine implements EngineInterface
@@ -52,16 +52,16 @@ abstract class AbstractEngine implements EngineInterface
     protected $running = false;
     /** @var PriorityCollection */
     protected $plugins;
-    /** @var PriorityCollection */
-    protected $interruptionPlugins;
     /** @var callable|null */
     protected $cleanupHandler;
 
     protected $exitCode = 0;
     protected $exitReason = "";
 
-    const RUNLOOP_CONTINUE = 1;
-    const RUNLOOP_STOP_ENGINE = 2;
+	/** @var MemoryRegisterInterface */
+	private $memoryRegister;
+	/** @var AlertManagerInterface */
+	private $alertManager;
 
     /** @var AbstractEngine|null */
     private static $runningEngine;
@@ -69,8 +69,6 @@ abstract class AbstractEngine implements EngineInterface
     public function __construct($name = 'Ikarus SPS, (c) by TASoft Applications')
     {
         $this->plugins = new PriorityCollection();
-        $this->interruptionPlugins = new PriorityCollection();
-
         $this->name = $name;
     }
 
@@ -95,25 +93,16 @@ abstract class AbstractEngine implements EngineInterface
      *
      * @param PluginInterface $plugin
      * @param int $priority
-     * @return bool
+     * @return static
      */
     public function addPlugin(PluginInterface $plugin, int $priority = 0) {
         if($this->isRunning())
-            return false;
+            throw new ImmutableSPSException("Can not add plugins while Ikarus SPS is running", 182);
 
         if(!$this->plugins->contains($plugin) && $this->shouldAddPlugin($plugin, $priority)) {
             $this->plugins->add($priority, $plugin);
-            if($plugin instanceof PluginChildrenInterface) {
-                foreach($plugin->getChildPlugins() as $p)
-                    $this->addPlugin($p, $priority);
-            }
-            if($plugin instanceof InterruptPluginInterface) {
-                $this->interruptionPlugins->add($priority, $plugin);
-            }
-            return true;
         }
-
-        return false;
+        return $this;
     }
 
     /**
@@ -139,15 +128,60 @@ abstract class AbstractEngine implements EngineInterface
 
     /**
      * @param $plugin
-     * @return bool
+     * @return static
      */
     public function removePlugin($plugin) {
-        if($this->isRunning())
-            return false;
+		if($this->isRunning())
+			throw new ImmutableSPSException("Can not remove plugins while Ikarus SPS is running", 183);
+
         if($this->willRemovePlugin($plugin))
             $this->plugins->remove($plugin);
-        return true;
+        return $this;
     }
+
+	/**
+	 * @return MemoryRegisterInterface
+	 */
+	public function getMemoryRegister(): MemoryRegisterInterface
+	{
+		if(!$this->memoryRegister)
+			$this->setMemoryRegister( new InternalMemoryRegister() );
+		return $this->memoryRegister;
+	}
+
+	/**
+	 * @param MemoryRegisterInterface $memoryRegister
+	 * @return static
+	 */
+	public function setMemoryRegister(MemoryRegisterInterface $memoryRegister)
+	{
+		$this->memoryRegister = $memoryRegister;
+		if($memoryRegister instanceof EngineDependencyInterface)
+			$memoryRegister->setEngine($this);
+		return $this;
+	}
+
+	/**
+	 * @return AlertManagerInterface
+	 */
+	public function getAlertManager(): AlertManagerInterface
+	{
+		if(!$this->alertManager)
+			$this->setAlertManager( new DefaultAlertManager() );
+		return $this->alertManager;
+	}
+
+	/**
+	 * @param AlertManagerInterface $alertManager
+	 * @return static
+	 */
+	public function setAlertManager(AlertManagerInterface $alertManager)
+	{
+		$this->alertManager = $alertManager;
+		if($alertManager instanceof EngineDependencyInterface)
+			$alertManager->setEngine($this);
+		return $this;
+	}
 
     /**
      * @inheritDoc
@@ -167,10 +201,14 @@ abstract class AbstractEngine implements EngineInterface
     /**
      * @inheritDoc
      */
-    public function stop()
+    public function stop($code = 0, $reason = "")
     {
         if($this->isRunning()) {
+			$this->exitCode = $code;
+			$this->exitReason = $reason;
+
             $this->tearDownEngine();
+
             $this->running = false;
             self::$runningEngine = NULL;
         }
@@ -192,7 +230,6 @@ abstract class AbstractEngine implements EngineInterface
                 $this->tearDownEngine();
                 throw $throwable;
             }
-
         }
         return $this->exitCode;
     }
@@ -207,20 +244,11 @@ abstract class AbstractEngine implements EngineInterface
      */
     protected function setupEngine() {
         foreach($this->getPlugins() as $plugin) {
-            if($plugin instanceof EngineDependentPluginInterface)
+            if($plugin instanceof EngineDependencyInterface)
                 $plugin->setEngine( $this );
             if($plugin instanceof SetupPluginInterface)
                 $plugin->setup();
         }
-    }
-
-    /**
-     * @param int $code
-     * @param string $reason
-     * @return int
-     */
-    protected function shouldTerminate($code=0,$reason=""): int {
-        return static::RUNLOOP_STOP_ENGINE;
     }
 
     /**
@@ -230,28 +258,12 @@ abstract class AbstractEngine implements EngineInterface
         foreach($this->getPlugins() as $plugin) {
             if($plugin instanceof TearDownPluginInterface)
                 $plugin->tearDown();
-            if($plugin instanceof EngineDependentPluginInterface)
+            if($plugin instanceof EngineDependencyInterface)
                 $plugin->setEngine( NULL );
         }
 
         if(is_callable($cb = $this->getCleanUpHandler()))
             call_user_func($cb);
-    }
-
-    /**
-     * Internal call to handle interruptions
-     *
-     * @param InterruptException $exception
-     * @param PluginManagementInterface $management
-     * @return bool
-     */
-    protected function handleInterruption(InterruptException $exception, PluginManagementInterface $management): bool {
-        /** @var InterruptPluginInterface $plugin */
-        foreach($this->interruptionPlugins->getOrderedElements() as $plugin) {
-            if($plugin->performInterrupt($exception, $management))
-                return true;
-        }
-        return false;
     }
 
     /**
@@ -264,10 +276,12 @@ abstract class AbstractEngine implements EngineInterface
 
     /**
      * @param callable|null $cleanupHandler
+	 * @return static
      */
-    public function setCleanupHandler(?callable $cleanupHandler): void
+    public function setCleanupHandler(?callable $cleanupHandler)
     {
         $this->cleanupHandler = $cleanupHandler;
+        return $this;
     }
 
     /**

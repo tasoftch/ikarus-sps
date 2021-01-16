@@ -32,13 +32,45 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\Interval;
 
+use Ikarus\SPS\Plugin\AbstractPlugin;
+use Ikarus\SPS\Register\MemoryRegisterInterface;
 
-interface SetupPluginInterface
+abstract class AbstractCycleIntervalPlugin extends AbstractPlugin
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+	private $_current = 0;
+
+	/**
+	 * Get count of cycles to call the interval.
+	 * Return 10 means each 10th cycle the updateInterval method gets invoked.
+	 *
+	 * @return int
+	 */
+	abstract protected function getInterval(): int;
+
+	/**
+	 * @param MemoryRegisterInterface $memoryRegister
+	 * @return void
+	 */
+	abstract protected function updateInterval(MemoryRegisterInterface $memoryRegister);
+
+	/**
+	 * @param int $current
+	 */
+	public function setCurrent(int $current) {
+		$this->_current = $current;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function update(MemoryRegisterInterface $memoryRegister)
+	{
+		if($this->_current <= 0) {
+			$this->_current = $this->getInterval();
+			$this->updateInterval($memoryRegister);
+		} else
+			$this->_current--;
+	}
 }

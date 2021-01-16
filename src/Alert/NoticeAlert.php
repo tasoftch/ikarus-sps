@@ -32,13 +32,16 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Alert;
 
-
-interface SetupPluginInterface
+/**
+ * Class NoticeAlert can be triggered to inform Ikarus SPS that something did happen that's worth to write into log.
+ * @package Ikarus\SPS\Alert
+ */
+class NoticeAlert extends AbstractAlert
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+	public function getLevel(): int
+	{
+		return self::ALERT_LEVEL_NOTICE;
+	}
 }

@@ -34,100 +34,26 @@
 
 namespace Ikarus\SPS;
 
-use Ikarus\SPS\Exception\InterruptException;
+use Ikarus\SPS\Exception\EngineControlException;
 use Ikarus\SPS\Exception\SPSException;
-use Ikarus\SPS\Helper\CyclicPluginManager;
-use Ikarus\SPS\Plugin\Cyclic\CyclicPluginInterface;
-use Ikarus\SPS\Plugin\Cyclic\UpdateOncePluginInterface;
-use Ikarus\SPS\Plugin\Management\CyclicPluginManagementInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
-use TASoft\Collection\PriorityCollection;
-use TASoft\Util\ValueInjector;
+use Ikarus\SPS\Register\WorkflowDependentMemoryRegister;
 
-class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
+class CyclicEngine extends AbstractEngine
 {
     /** @var int */
-    private $frequency;
-    /** @var PriorityCollection */
-    private $cyclicPlugins;
+    private $interval;
 
-    private $pluginManager;
-
-    public static $pluginManagementClassName = CyclicPluginManager::class;
-
-    /**
-     * CyclicEngine constructor.
-     * @param int $frequency
-     * @param string $name
-     */
-    public function __construct(int $frequency = 2, $name = 'Ikarus SPS, (c) by TASoft Applications')
+	/**
+	 * CyclicEngine constructor.
+	 * Pass an interval in milli seconds (ms) ex: 2000 to update each 2 seconds.
+	 * @param int $interval
+	 * @param string $name
+	 */
+    public function __construct(int $interval = 2000, $name = 'Ikarus SPS, (c) by TASoft Applications')
     {
         parent::__construct($name);
-        $this->frequency = $frequency;
-        $this->cyclicPlugins = new PriorityCollection();
-    }
-
-    /**
-     * @param PluginInterface $plugin
-     * @param int $priority
-     * @return bool
-     */
-    protected function shouldAddPlugin(PluginInterface $plugin, int $priority): bool
-    {
-        if($plugin instanceof CyclicPluginInterface)
-            $this->cyclicPlugins->add($priority, $plugin);
-        return parent::shouldAddPlugin($plugin, $priority);
-    }
-
-    /**
-     * @param PluginInterface $plugin
-     * @return bool
-     */
-    protected function willRemovePlugin(PluginInterface $plugin): bool
-    {
-        $this->cyclicPlugins->remove($plugin);
-        return parent::willRemovePlugin($plugin);
-    }
-
-    /**
-     * @param int $code
-     * @param string $reason
-     */
-    public function stop($code = 0, $reason = "")
-    {
-        $this->exitCode = $code;
-        $this->exitReason = $reason;
-
-        parent::stop();
-        $this->running = false;
-    }
-
-    /**
-     * @return CyclicPluginManagementInterface
-     */
-    public function getPluginManager(): CyclicPluginManagementInterface
-    {
-        if(!$this->pluginManager)
-            $this->pluginManager = $this->makeCycliclPluginManager();
-        return $this->pluginManager;
-    }
-
-    /**
-     * @param CyclicPluginManagementInterface $pluginManager
-     */
-    public function setPluginManager(CyclicPluginManagementInterface $pluginManager): void
-    {
-        $this->pluginManager = $pluginManager;
-    }
-
-    /**
-     * This method gets called once to create a plugin management if nothing was set during the initial procedure.
-     *
-     * @return CyclicPluginManagementInterface
-     */
-    protected function makeCycliclPluginManager() {
-        $c = static::$pluginManagementClassName;
-        return new $c();
+        $this->interval = $interval;
     }
 
     /**
@@ -138,9 +64,10 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
         $scheduler = [];
 
         $_TS = microtime(true);
+        $plugins = $this->getPlugins();
 
-        /** @var CyclicPluginInterface $plugin */
-        foreach($this->cyclicPlugins->getOrderedElements() as $plugin) {
+        /** @var PluginInterface $plugin */
+        foreach($plugins as $plugin) {
             $scheduler[ $plugin->getIdentifier() ] = $_TS;
         }
 
@@ -148,31 +75,18 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             throw new SPSException("Engine does not have any plugin", 13);
         }
 
-        $manager = $this->getPluginManager();
-        $vi = new ValueInjector($manager, CyclicPluginManager::class);
-        $vi->f = function() { return $this->getFrequency(); };
-
         $schedule = function($freq) use (&$scheduler, &$plugin) {
-            $freq = 1 / $freq;
+        	$freq /= 1000;
             $scheduler[ $plugin->getIdentifier() ] = microtime(true) + $freq;
         };
 
-        $vi->rtf = function($of) use ($schedule) {
-            if($of <= 0)
-                $of = $this->getFrequency();
-            $schedule($of);
-            return true;
-        };
-        $vi->se = function($c, $r) {
-            $this->stop($c, $r);
-            return true;
-        };
+        $memReg = $this->getMemoryRegister();
 
         if(function_exists("pcntl_signal")) {
-            $handler = function() use ($manager) {
+            $handler = function() use ($memReg) {
                 $this->tearDownEngine();
-                if(method_exists($manager, 'tearDown'))
-                	$manager->tearDown();
+                if($memReg instanceof WorkflowDependentMemoryRegister)
+					$memReg->tearDown();
                 exit();
             };
 
@@ -180,10 +94,12 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             pcntl_signal(SIGINT, $handler);
         }
 
-		if(method_exists($manager, 'setup'))
-			$manager->setup();
+		if($memReg instanceof WorkflowDependentMemoryRegister)
+			$memReg->setup();
 
-		$once = true;
+		array_walk($plugins, function(PluginInterface $p) use ($memReg) {
+			$p->initialize($memReg);
+		});
 
         while ($this->isRunning()) {
             $waitFor = min(array_values($scheduler)) - microtime(true);
@@ -196,38 +112,46 @@ class CyclicEngine extends AbstractEngine implements CyclicEngineInterface
             if(!$this->isRunning())
                 break;
 
-			$manager->beginCycle();
-			foreach($this->cyclicPlugins->getOrderedElements() as $plugin) {
-				if($once && $plugin instanceof UpdateOncePluginInterface)
-					$plugin->updateOnce($manager);
+            if($memReg instanceof WorkflowDependentMemoryRegister)
+				$memReg->beginCycle();
 
+			foreach($this->getPlugins() as $plugin) {
                 if($scheduler[$plugin->getIdentifier()] < microtime(true)) {
-                    $schedule( $this->getFrequency() );
-                    try {
-                        $plugin->update($manager);
-                    } catch (InterruptException $exception) {
-                        if(!$this->handleInterruption($exception, $manager)) {
-                        	$manager->leaveCycle();
-							throw $exception;
+                    $schedule( $this->getInterval() );
+
+					try {
+						$plugin->update($memReg);
+					} catch (EngineControlException $exception) {
+						if($exception->getControl() == EngineControlException::CONTROL_STOP_CYCLE)
+							continue 2;
+						elseif($exception->getControl() == EngineControlException::CONTROL_STOP_ENGINE) {
+							$this->stop( $exception->getCode(), $exception->getMessage() );
 						}
-                    }
-                    if(!$this->isRunning())
-                        break;
+						elseif($exception->getControl() == EngineControlException::CONTROL_CRASH_ENGINE) {
+							if($memReg instanceof WorkflowDependentMemoryRegister) {
+								$memReg->endCycle();
+								$memReg->tearDown();
+							}
+							return;
+						} else
+							throw $exception;
+					}
                 }
             }
-			$once = false;
-			$manager->leaveCycle();
+
+			if($memReg instanceof WorkflowDependentMemoryRegister)
+				$memReg->endCycle();
         }
-		if(method_exists($manager, 'tearDown'))
-			$manager->tearDown();
+
+		if($memReg instanceof WorkflowDependentMemoryRegister)
+			$memReg->tearDown();
     }
 
-
-    /**
-     * @return int
-     */
-    public function getFrequency(): int
-    {
-        return $this->frequency;
-    }
+	/**
+	 * @return int
+	 */
+	public function getInterval(): int
+	{
+		return $this->interval;
+	}
 }
