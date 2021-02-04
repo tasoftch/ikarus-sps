@@ -1,8 +1,8 @@
 <?php
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright (c) 2019, TASoft Applications
+ * Copyright (c) 2021, TASoft Applications
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,40 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\Argument;
 
 
-interface SetupPluginInterface
+class PinArgument implements ArgumentInterface
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+	/** @var int|null */
+	private $pin;
+	/** @var int|null */
+	private $addr;
+
+	/**
+	 * PinArgument constructor.
+	 * @param int|null $pin
+	 * @param int|null $addr
+	 */
+	public function __construct(int $pin = NULL, int $addr = NULL)
+	{
+		$this->pin = $pin;
+		$this->addr = $addr;
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function getPin(): ?int
+	{
+		return $this->pin;
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function getAddr(): ?int
+	{
+		return $this->addr;
+	}
 }

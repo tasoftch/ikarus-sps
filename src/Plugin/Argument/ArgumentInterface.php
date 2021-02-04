@@ -1,8 +1,8 @@
 <?php
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright (c) 2019, TASoft Applications
+ * Copyright (c) 2021, TASoft Applications
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,15 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\Argument;
 
-
-interface SetupPluginInterface
+/**
+ * Interface ArgumentInterface
+ *
+ * Arguments can be defined and passed by the plugin's constructor method.
+ *
+ * @package Ikarus\SPS\Plugin\Argument
+ */
+interface ArgumentInterface
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
 }

@@ -32,13 +32,55 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Alert;
 
-
-interface SetupPluginInterface
+/**
+ * Class CriticalAlert let Ikarus SPS enter into a secure emergency state, informing the user and wait his decision.
+ * A critical alert must give the SPS a chance to get back to normal by calling a resume function.
+ * @package Ikarus\SPS\Alert
+ */
+class CriticalAlert extends AbstractAlert
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+	/** @var callable */
+	protected $callback;
+
+	/**
+	 * CriticalAlert constructor.
+	 *
+	 * Pass a resume callback that will restore the normal workflow that Ikarus SPS will be able to exit the emergency state.
+	 *
+	 * @param int $code
+	 * @param string $message
+	 * @param callable $resumeCallback
+	 * @param null $affectedPlugin
+	 * @param mixed ...$args
+	 */
+	public function __construct(int $code, string $message, callable $resumeCallback, $affectedPlugin = NULL, ...$args)
+	{
+		parent::__construct($code, $message, $affectedPlugin, $args);
+		$this->callback = $resumeCallback;
+	}
+
+	/**
+	 * @return callable
+	 */
+	public function getCallback(): callable
+	{
+		return $this->callback;
+	}
+
+	/**
+	 * @param callable $callback
+	 * @return CriticalAlert
+	 */
+	public function setCallback(callable $callback): CriticalAlert
+	{
+		$this->callback = $callback;
+		return $this;
+	}
+
+	public function getLevel(): int
+	{
+		return self::ALERT_LEVEL_CRITICAL;
+	}
 }

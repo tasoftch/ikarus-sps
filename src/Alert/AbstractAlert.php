@@ -32,13 +32,89 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Alert;
 
 
-interface SetupPluginInterface
+use Ikarus\SPS\Plugin\PluginInterface;
+
+abstract class AbstractAlert implements AlertInterface
 {
+    /** @var int */
+    private $code;
+    /** @var string */
+    private $message;
+    /** @var string|PluginInterface|null */
+    private $affectedPlugin;
+
+    /** @var int */
+    private $timeStamp;
+
+    private $id = 0;
+
     /**
-     * This method gets called before Ikarus SPS will start.
+     * AbstractAlert constructor.
+     * @param int $code
+     * @param string $message
+     * @param PluginInterface|string|null $affectedPlugin
+     * @param array $args
      */
-    public function setup();
+    public function __construct(int $code, string $message, $affectedPlugin, ...$args)
+    {
+        $this->code = $code;
+        $this->message = vsprintf($message, $args);
+        $this->affectedPlugin = $affectedPlugin;
+        $this->timeStamp = (new \DateTime("now"))->getTimestamp();
+    }
+
+
+    /**
+     * @return int
+     */
+    public function getCode(): int
+    {
+        return $this->code;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessage(): string
+    {
+        return $this->message;
+    }
+
+    /**
+     * @return PluginInterface|string|null
+     */
+    public function getAffectedPlugin()
+    {
+        return $this->affectedPlugin;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimeStamp(): int
+    {
+        return $this->timeStamp;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+	/**
+	 * The alert id can only be set once and gets set by the engine!
+	 *
+	 * @param int $id
+	 */
+    public function setId(int $id)
+    {
+        if(!$this->id)
+            $this->id = $id;
+    }
 }

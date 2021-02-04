@@ -39,7 +39,7 @@ interface TearDownPluginInterface
 {
     /**
      * Called to clean up
-     * This method is ALWAYS called, no matter of errors, exceptions or interruptions.
+     * This method is ALWAYS called before Ikarus SPS will stop running.
      *
      * @return void
      */

@@ -13,7 +13,7 @@
     }
   },
   "require" : {
-    "php": "^7.2",
+    "php": ">=7.2",
     "tasoft/event-manager": "^1.0",
     "tasoft/process": "^1.0",
     "tasoft/value-injector": "^1.0",

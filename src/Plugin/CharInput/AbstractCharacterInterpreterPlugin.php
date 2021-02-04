@@ -32,13 +32,21 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\CharInput;
 
+use Ikarus\SPS\Register\MemoryRegisterInterface;
 
-interface SetupPluginInterface
+abstract class AbstractCharacterInterpreterPlugin extends AbstractCharacterInputPlugin
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+    protected $characterMethodMap = [
+    ];
+
+	protected function performCommandByCharacter(string $character, MemoryRegisterInterface $memoryRegister)
+	{
+		if($method = $this->characterMethodMap[ $character ] ?? NULL) {
+			if(method_exists($this, $method)) {
+				call_user_func([$this, $method], $memoryRegister);
+			}
+		}
+	}
 }

@@ -32,13 +32,14 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\ValueProvider;
 
-
-interface SetupPluginInterface
+interface ValueInterface
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+	/**
+	 * Gets the value
+	 *
+	 * @return mixed
+	 */
+	public function getValue();
 }

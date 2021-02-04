@@ -35,6 +35,8 @@
 namespace Ikarus\SPS\Plugin;
 
 
+use Ikarus\SPS\Register\MemoryRegisterInterface;
+
 /**
  * The engine needs plugins that interact as sps.
  *
@@ -48,4 +50,20 @@ interface PluginInterface
      * @return string
      */
     public function getIdentifier(): string;
+
+	/**
+	 * This method gets called by the plugins to initialize.
+	 * Please note that is is always called in the main process of Ikarus SPS.
+	 * Plugins, that require their own process must not block or delay this method call!
+	 *
+	 * @param MemoryRegisterInterface $memoryRegister
+	 */
+    public function initialize(MemoryRegisterInterface $memoryRegister);
+
+	/**
+	 * This method gets called cyclic by the engine and let Ikarus SPS work.
+	 *
+	 * @param MemoryRegisterInterface $memoryRegister
+	 */
+    public function update(MemoryRegisterInterface $memoryRegister);
 }

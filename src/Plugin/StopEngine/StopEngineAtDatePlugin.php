@@ -32,13 +32,43 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\StopEngine;
 
 
-interface SetupPluginInterface
+use DateTime;
+use Ikarus\SPS\Plugin\AbstractPlugin;
+use Ikarus\SPS\Register\MemoryRegisterInterface;
+
+class StopEngineAtDatePlugin extends AbstractPlugin
 {
+    /** @var DateTime */
+    private $date;
+
     /**
-     * This method gets called before Ikarus SPS will start.
+     * StopEngineAtDatePlugin constructor.
+     * @param DateTime $date
+     * @param string|null $identifier
      */
-    public function setup();
+    public function __construct(DateTime $date, string $identifier = NULL)
+    {
+        parent::__construct($identifier !== NULL ? $identifier : $date->format("Y-m-d G:i:s.u"));
+        $this->date = $date;
+    }
+
+
+    public function update(MemoryRegisterInterface $memoryRegister)
+    {
+        $dd = ($this->date->getTimestamp() + ($this->date->format("u") / 1e6)) - microtime(true);
+        if($dd <= 0)
+            $memoryRegister->stopEngine(-12, 'Stop engine date reached service');
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getDate(): DateTime
+    {
+        return $this->date;
+    }
+
 }

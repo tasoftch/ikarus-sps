@@ -32,13 +32,18 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\StopEngine;
 
+use Ikarus\SPS\Plugin\CharInput\AbstractCharacterInterpreterPlugin;
+use Ikarus\SPS\Register\MemoryRegisterInterface;
 
-interface SetupPluginInterface
+class StopEngineOnCharacterInput extends AbstractCharacterInterpreterPlugin
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+    protected $characterMethodMap = [
+        'q' => 'quitAction'
+    ];
+
+    protected function quitAction(MemoryRegisterInterface $management) {
+        $management->stopEngine(-23, 'Stop engine char input service');
+    }
 }

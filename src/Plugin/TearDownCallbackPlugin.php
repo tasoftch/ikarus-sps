@@ -35,10 +35,18 @@
 namespace Ikarus\SPS\Plugin;
 
 
-interface SetupPluginInterface
+use Ikarus\SPS\Register\MemoryRegisterInterface;
+
+class TearDownCallbackPlugin extends CallbackCyclicPlugin implements TearDownPluginInterface
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
-     */
-    public function setup();
+    public function update(MemoryRegisterInterface $memoryRegister)
+    {
+        // NOOP
+    }
+
+
+    public function tearDown()
+    {
+        call_user_func( $this->getCallback() );
+    }
 }

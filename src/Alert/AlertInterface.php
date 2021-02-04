@@ -32,13 +32,74 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Alert;
 
 
-interface SetupPluginInterface
+use Ikarus\SPS\Plugin\PluginInterface;
+
+/**
+ * Interface AlertInterface
+ *
+ * Alerts are information processes that can jump out of a normal sps cyclic process.
+ * There are three kinds of alerts:
+ * notice: The notice is designed just to be logged.
+ * warning: A warning should be visible to the user indicating that something might go wrong.
+ * critical: A critical alert must inform the user and bring the SPS into a secure emergency state.
+ *
+ * @package Ikarus\SPS\Alert
+ */
+interface AlertInterface
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
+	const ALERT_LEVEL_NOTICE = 1;
+	const ALERT_LEVEL_WARNING = 2;
+	const ALERT_LEVEL_CRITICAL = 3;
+	const ALERT_LEVEL_EMERGENCY = 4;
+
+
+	/**
+     * An alert identifier
+     * Please note that the engine call this method BEFORE setID() to verify the alert's uniquely state.
+	 * It must return 0 on the first call.
+	 *
+     * @return string|int
      */
-    public function setup();
+    public function getID();
+
+	/**
+	 * This method must store the alert id and be able to return it under the getID() method.
+	 *
+	 * @param int $id
+	 */
+    public function setID(int $id);
+
+    /**
+     * Gets the alert code
+     *
+     * @return int
+     */
+    public function getCode(): int;
+
+	/**
+	 * @return int
+	 */
+    public function getLevel(): int;
+
+    /**
+     * Gets an alert message
+     *
+     * @return string
+     */
+    public function getMessage(): string;
+
+    /**
+     * Gets an affected plugin if available
+     *
+     * @return string|PluginInterface|null
+     */
+    public function getAffectedPlugin();
+
+    /**
+     * @return int
+     */
+    public function getTimeStamp(): int;
 }

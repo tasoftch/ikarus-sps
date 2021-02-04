@@ -34,11 +34,12 @@
 
 namespace Ikarus\SPS;
 
-use Ikarus\SPS\Plugin\Management\PluginManagementInterface;
+use Ikarus\SPS\AlertManager\AlertManagerInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
+use Ikarus\SPS\Register\MemoryRegisterInterface;
 
 /**
- * The Ikarus SPS Engine dispatches the plugins to separate processes (if needed) and handle a common gateway to let all plugins communicate between each other.
+ * The Ikarus SPS Engine dispatches the plugins to separate processes (if needed) and handle a common memory register to let all plugins communicate between each other.
  * When the SPS Engine runs, it is controlling a machine or what ever.
  *
  * @package Ikarus\SPS
@@ -52,25 +53,29 @@ interface EngineInterface
      */
     public function getPlugins(): array;
 
+	/**
+	 * @return MemoryRegisterInterface
+	 */
+	public function getMemoryRegister(): MemoryRegisterInterface;
+
+	/**
+	 * @return AlertManagerInterface
+	 */
+	public function getAlertManager(): AlertManagerInterface;
+
     /**
-     * Runs the engine
+     * Runs the engine.
+	 * Please note that this method call blocks the current process.
      */
     public function run();
 
-    /**
-     * Returns true, if the engine is running
-     *
-     * @return bool
-     */
-    public function isRunning(): bool;
+	/**
+	 * Stops the engine
+	 *
+	 * @param int $code
+	 * @param string $reason
+	 */
+	public function stop($code = 0, $reason = "");
 
-    /**
-     * Stops the engine
-     */
-    public function stop();
 
-    /**
-     * @return PluginManagementInterface
-     */
-    public function getPluginManager();
 }

@@ -32,13 +32,44 @@
  *
  */
 
-namespace Ikarus\SPS\Plugin;
+namespace Ikarus\SPS\Plugin\CharInput;
 
+use Ikarus\SPS\Exception\SPSException;
+use Ikarus\SPS\Plugin\AbstractPlugin;
+use Ikarus\SPS\Register\MemoryRegisterInterface;
 
-interface SetupPluginInterface
+abstract class AbstractCharacterInputPlugin extends AbstractPlugin
 {
-    /**
-     * This method gets called before Ikarus SPS will start.
+    public function update(MemoryRegisterInterface $memoryRegister)
+    {
+        $non_block_read = function($fd, &$data) {
+            $read = array($fd);
+            $write = array();
+            $except = array();
+            $result = stream_select($read, $write, $except, 0);
+            if($result === false) throw new SPSException('stream_select failed');
+            if($result === 0) return false;
+            $data = stream_get_line($fd, 1);
+            return true;
+        };
+
+        $stdin = is_resource(STDIN) ? STDIN : fopen("php://input", 'r');
+        $data = "";
+        if($non_block_read($stdin, $data)) {
+            $this->performCommandByCharacter( $data, $memoryRegister );
+        }
+    }
+
+	/**
+	 * @inheritDoc
+	 */
+    public function initialize(MemoryRegisterInterface $memoryRegister)
+	{
+	}
+
+	/**
+     * @param string $character
+     * @param MemoryRegisterInterface $memoryRegister
      */
-    public function setup();
+    abstract protected function performCommandByCharacter(string $character, MemoryRegisterInterface $memoryRegister);
 }
