@@ -10,7 +10,6 @@ use Ikarus\SPS\Register\MemoryRegisterInterface;
 class ValueProviderPlugin extends AbstractPlugin
 {
 	private $values;
-	private $domain;
 
 	/**
 	 * ValueProviderPlugin constructor.
@@ -20,10 +19,9 @@ class ValueProviderPlugin extends AbstractPlugin
 	 */
 	public function __construct(string $identifier, string $domain, iterable $values = [])
 	{
-		parent::__construct($identifier);
+		parent::__construct($identifier, $domain);
 
 		$this->values = $values;
-		$this->domain = $domain;
 	}
 
 	/**
@@ -51,14 +49,6 @@ class ValueProviderPlugin extends AbstractPlugin
 	public function getValues(): iterable
 	{
 		return $this->values;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getDomain(): string
-	{
-		return $this->domain;
 	}
 
 	/**

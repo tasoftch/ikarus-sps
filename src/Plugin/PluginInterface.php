@@ -52,6 +52,13 @@ interface PluginInterface
     public function getIdentifier(): string;
 
 	/**
+	 * Specifies a domain where the configured plugin will work.
+	 *
+	 * @return string
+	 */
+    public function getDomain(): string;
+
+	/**
 	 * This method gets called by the plugins to initialize.
 	 * Please note that is is always called in the main process of Ikarus SPS.
 	 * Plugins, that require their own process must not block or delay this method call!

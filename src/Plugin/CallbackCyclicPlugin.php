@@ -10,14 +10,15 @@ class CallbackCyclicPlugin extends AbstractPlugin
     /** @var callable */
     private $callback;
 
-    /**
-     * CallbackCyclicPlugin constructor.
-     * @param string $identifier
-     * @param callable $callback
-     */
-    public function __construct(string $identifier, callable $callback)
+	/**
+	 * CallbackCyclicPlugin constructor.
+	 * @param string $identifier
+	 * @param callable $callback
+	 * @param string|null $domain
+	 */
+    public function __construct(string $identifier, callable $callback, string $domain = NULL)
     {
-        parent::__construct($identifier);
+        parent::__construct($identifier, $domain);
         $this->callback = $callback;
     }
 
@@ -29,6 +30,9 @@ class CallbackCyclicPlugin extends AbstractPlugin
         return $this->callback;
     }
 
+	/**
+	 * @inheritDoc
+	 */
     public function update(MemoryRegisterInterface $memoryRegister)
     {
         return call_user_func($this->getCallback(), $memoryRegister);
