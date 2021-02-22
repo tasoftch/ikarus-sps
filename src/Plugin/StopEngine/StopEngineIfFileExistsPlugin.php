@@ -4,6 +4,7 @@ namespace Ikarus\SPS\Plugin\StopEngine;
 
 
 use Ikarus\SPS\Plugin\AbstractPlugin;
+use Ikarus\SPS\Plugin\SetupPluginInterface;
 use Ikarus\SPS\Register\MemoryRegisterInterface;
 
 /**
@@ -12,7 +13,7 @@ use Ikarus\SPS\Register\MemoryRegisterInterface;
  *
  * @package Ikarus\SPS\Plugin\Cyclic
  */
-class StopEngineIfFileExistsPlugin extends AbstractPlugin
+class StopEngineIfFileExistsPlugin extends AbstractPlugin implements SetupPluginInterface
 {
     /** @var string */
     private $filename;
@@ -36,7 +37,14 @@ class StopEngineIfFileExistsPlugin extends AbstractPlugin
         return $this->filename;
     }
 
-    public function update(MemoryRegisterInterface $memoryRegister)
+	public function setup()
+	{
+		if(file_exists($this->getFilename()))
+			unlink($this->getFilename());
+	}
+
+
+	public function update(MemoryRegisterInterface $memoryRegister)
     {
         if(file_exists( $this->getFilename() )) {
             $memoryRegister->stopEngine(-9, 'Stop engine file exists service');
