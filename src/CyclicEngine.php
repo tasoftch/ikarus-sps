@@ -34,6 +34,7 @@
 
 namespace Ikarus\SPS;
 
+use Ikarus\SPS\AlertManager\UpdatedAlertManagerInterface;
 use Ikarus\SPS\Exception\EngineControlException;
 use Ikarus\SPS\Exception\SPSException;
 use Ikarus\SPS\Plugin\PluginInterface;
@@ -101,6 +102,10 @@ class CyclicEngine extends AbstractEngine
 			$p->initialize($memReg);
 		});
 
+		$am = $this->getAlertManager();
+		if($am instanceof EngineDependencyInterface)
+			$am->setEngine($this);
+
         while ($this->isRunning()) {
             $waitFor = min(array_values($scheduler)) - microtime(true);
             if($waitFor > 0) {
@@ -114,6 +119,9 @@ class CyclicEngine extends AbstractEngine
 
             if($memReg instanceof WorkflowDependentMemoryRegister)
 				$memReg->beginCycle();
+
+            if($am instanceof UpdatedAlertManagerInterface)
+            	$am->cyclicUpdate( $memReg );
 
 			foreach($this->getPlugins() as $plugin) {
                 if($scheduler[$plugin->getIdentifier()] < microtime(true)) {

@@ -10,7 +10,7 @@ use Ikarus\SPS\EngineDependencyInterface;
 use Ikarus\SPS\EngineInterface;
 use Ikarus\SPS\Register\MemoryRegisterInterface;
 
-class DefaultAlertManager implements AlertManagerInterface, EngineDependencyInterface
+class DefaultAlertManager implements UpdatedAlertManagerInterface, EngineDependencyInterface
 {
 	private $notifiers = [];
 	private $emergencyAlert = 0;

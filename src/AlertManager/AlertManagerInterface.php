@@ -27,12 +27,4 @@ interface AlertManagerInterface
 	 * @param int $timeStamp
 	 */
 	public function dispatchAlert(int $alertID, int $code, int $level, string $message, ?string $affectedPlugins, int $timeStamp);
-
-	/**
-	 * The alert manager also gets updated each cycle to detect, if an alert was acknowledged.
-	 * If so, the alert manager must call the memory registers acknowledgeAlert method to continue to normal process.
-	 *
-	 * @param MemoryRegisterInterface $memoryRegister
-	 */
-	public function cyclicUpdate(MemoryRegisterInterface $memoryRegister);
 }
