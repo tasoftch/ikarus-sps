@@ -106,6 +106,33 @@ class CyclicEngine extends AbstractEngine
 		if($am instanceof EngineDependencyInterface)
 			$am->setEngine($this);
 
+		$stopCycle = function(EngineControlException $exception) {
+			if($exception->getControl() == $exception::CONTROL_STOP_CYCLE)
+				return true;
+			return false;
+		};
+
+		$stopEngine = function(EngineControlException $exception) {
+			if($exception->getControl() == $exception::CONTROL_STOP_ENGINE) {
+				$this->stop( $exception->getCode(), $exception->getMessage() );
+				return true;
+			}
+			return false;
+		};
+
+		$crashEngine = function(EngineControlException $exception) use ($memReg) {
+			if($exception->getControl() == $exception::CONTROL_CRASH_ENGINE) {
+				if ($memReg instanceof WorkflowDependentMemoryRegister) {
+					$memReg->endCycle();
+					$memReg->tearDown();
+				}
+				return true;
+			}
+			return false;
+		};
+
+
+		$cc = 1;
         while ($this->isRunning()) {
             $waitFor = min(array_values($scheduler)) - microtime(true);
             if($waitFor > 0) {
@@ -117,8 +144,17 @@ class CyclicEngine extends AbstractEngine
             if(!$this->isRunning())
                 break;
 
-            if($memReg instanceof WorkflowDependentMemoryRegister)
-				$memReg->beginCycle();
+            try {
+				if($memReg instanceof WorkflowDependentMemoryRegister)
+					$memReg->beginCycle();
+			} catch (EngineControlException $exception) {
+            	if($stopEngine($exception))
+					goto end_cycle;
+            	 elseif($crashEngine($exception)) {
+					return;
+				} else
+					throw $exception;
+			}
 
             if($am instanceof UpdatedAlertManagerInterface)
             	$am->cyclicUpdate( $memReg );
@@ -130,22 +166,20 @@ class CyclicEngine extends AbstractEngine
 					try {
 						$plugin->update($memReg);
 					} catch (EngineControlException $exception) {
-						if($exception->getControl() == EngineControlException::CONTROL_STOP_CYCLE)
+						if($stopCycle($exception))
 							continue 2;
-						elseif($exception->getControl() == EngineControlException::CONTROL_STOP_ENGINE) {
-							$this->stop( $exception->getCode(), $exception->getMessage() );
+						elseif($stopEngine($exception)) {
+							;
 						}
-						elseif($exception->getControl() == EngineControlException::CONTROL_CRASH_ENGINE) {
-							if($memReg instanceof WorkflowDependentMemoryRegister) {
-								$memReg->endCycle();
-								$memReg->tearDown();
-							}
+						elseif($crashEngine($exception)) {
 							return;
 						} else
 							throw $exception;
 					}
                 }
             }
+
+			end_cycle:
 
 			if($memReg instanceof WorkflowDependentMemoryRegister)
 				$memReg->endCycle();
