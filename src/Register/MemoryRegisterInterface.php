@@ -81,9 +81,10 @@ interface MemoryRegisterInterface
 	 * @param mixed $value
 	 * @param string $key
 	 * @param string $domain
+	 * @param bool $merged
 	 * @return void
 	 */
-	public function putValue($value, string $key, string $domain);
+	public function putValue($value, string $key, string $domain, bool $merged = false);
 
 	/**
 	 * Checks, if a value exists in a domain or specific of a key

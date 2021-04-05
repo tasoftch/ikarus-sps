@@ -87,10 +87,12 @@ class InternalMemoryRegister implements MemoryRegisterInterface, EngineDependenc
 	/**
 	 * @inheritDoc
 	 */
-	public function putValue($value, $key, $domain)
+	public function putValue($value, $key, $domain, bool $merged = false)
 	{
 		if(NULL === $value)
 			unset($this->values[$domain][$key]);
+		elseif($merged && is_array($value) && is_array($this->values[$domain][$key]))
+			$this->values[$domain][$key] = array_merge($this->values[$domain][$key], $value);
 		else
 			$this->values[$domain][$key] = $value;
 	}
