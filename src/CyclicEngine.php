@@ -37,6 +37,7 @@ namespace Ikarus\SPS;
 use Ikarus\SPS\AlertManager\UpdatedAlertManagerInterface;
 use Ikarus\SPS\Exception\EngineControlException;
 use Ikarus\SPS\Exception\SPSException;
+use Ikarus\SPS\Plugin\CycleAwarePluginInterface;
 use Ikarus\SPS\Plugin\PluginInterface;
 use Ikarus\SPS\Register\WorkflowDependentMemoryRegister;
 
@@ -63,6 +64,7 @@ class CyclicEngine extends AbstractEngine
     function runEngine()
     {
         $scheduler = [];
+        $cycleAwarePlugins = [];
 
         $_TS = microtime(true);
         $plugins = $this->getPlugins();
@@ -70,6 +72,8 @@ class CyclicEngine extends AbstractEngine
         /** @var PluginInterface $plugin */
         foreach($plugins as $plugin) {
             $scheduler[ $plugin->getIdentifier() ] = $_TS;
+            if($plugin instanceof CycleAwarePluginInterface)
+            	$cycleAwarePlugins[] = $plugin;
         }
 
         if(!$scheduler) {
@@ -132,7 +136,6 @@ class CyclicEngine extends AbstractEngine
 		};
 
 
-		$cc = 1;
         while ($this->isRunning()) {
             $waitFor = min(array_values($scheduler)) - microtime(true);
             if($waitFor > 0) {
@@ -147,6 +150,10 @@ class CyclicEngine extends AbstractEngine
             try {
 				if($memReg instanceof WorkflowDependentMemoryRegister)
 					$memReg->beginCycle();
+
+				array_walk($cycleAwarePlugins, function(CycleAwarePluginInterface $plugin) use ($memReg) {
+					$plugin->beginCycle($memReg);
+				});
 			} catch (EngineControlException $exception) {
             	if($stopEngine($exception))
 					goto end_cycle;
@@ -180,6 +187,10 @@ class CyclicEngine extends AbstractEngine
             }
 
 			end_cycle:
+
+			array_walk($cycleAwarePlugins, function(CycleAwarePluginInterface $plugin) use ($memReg) {
+				$plugin->endCycle($memReg);
+			});
 
 			if($memReg instanceof WorkflowDependentMemoryRegister)
 				$memReg->endCycle();
