@@ -166,11 +166,12 @@ class CyclicEngine extends AbstractEngine
             if($am instanceof UpdatedAlertManagerInterface)
             	$am->cyclicUpdate( $memReg );
 
-			foreach($this->getPlugins() as $plugin) {
+			foreach($this->getPlugins() as $idx => $plugin) {
                 if($scheduler[$plugin->getIdentifier()] < microtime(true)) {
                     $schedule( $this->getInterval() );
 
 					try {
+						$GLOBALS["P_IDX"] = $idx;
 						$plugin->update($memReg);
 					} catch (EngineControlException $exception) {
 						if($stopCycle($exception))
