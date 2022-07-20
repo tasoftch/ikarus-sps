@@ -20,6 +20,8 @@ interface MemoryRegisterInterface
 	const STATUS_ERROR = 1<<2;
 	const STATUS_MANUAL = 1<<3;
 
+	const STATUS_PANEL = 1<<5;
+
 	/**
 	 * Stops the current cycle and restart it
 	 *
@@ -110,13 +112,15 @@ interface MemoryRegisterInterface
 	 * But you can define further status codes if required.
 	 *
 	 * Each plugin must verify, that it exposes its status to the memory.
-	 * To do so, the plugin must
+	 *
+	 * Merging status means, that only on, off and error gets applied in the register.
 	 *
 	 * @param int $status
 	 * @param string $pluginID
+	 * @param bool $merge
 	 * @see MemoryRegisterInterface::STATUS_* constants
 	 */
-	public function setStatus(int $status, string $pluginID);
+	public function setStatus(int $status, string $pluginID, bool $merge = true);
 
 	/**
 	 * If the plugin is available, return its status.

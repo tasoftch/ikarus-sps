@@ -156,10 +156,10 @@ class InternalMemoryRegister implements MemoryRegisterInterface, EngineDependenc
 	/**
 	 * @inheritDoc
 	 */
-	public function setStatus(int $status, string $pluginID)
+	public function setStatus(int $status, string $pluginID, bool $merge = true)
 	{
 		if(isset($this->status[$pluginID]) || $status == self::STATUS_REGISTER)
-			$this->status[$pluginID] = $status;
+			$this->status[$pluginID] = $merge ? (($this->status[$pluginID] & ~ 7) | ($status & 0x7)) : $status;
 	}
 
 	/**
