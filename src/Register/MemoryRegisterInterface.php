@@ -138,6 +138,12 @@ interface MemoryRegisterInterface
 	 */
 	public function getStatus(string $pluginID): ?int;
 
+    /**
+     * @param array $panel
+     * @param string $pluginID
+     */
+	public function putPanel(array $panel, string $pluginID);
+
 	/**
 	 * Triggers an alert in the sps.
 	 *

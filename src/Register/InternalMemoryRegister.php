@@ -162,6 +162,12 @@ class InternalMemoryRegister implements MemoryRegisterInterface, EngineDependenc
 			$this->status[$pluginID] = $merge ? (($this->status[$pluginID] & ~ 7) | ($status & 0x7)) : $status;
 	}
 
+	public function putPanel(array $panel, string $pluginID)
+	{
+		// This method is only available on common memory registers.
+	}
+
+
 	/**
 	 * @inheritDoc
 	 */
