@@ -61,4 +61,42 @@ abstract class AbstractPlugin implements PluginInterface
 		$this->domain = $domain;
 		return $this;
 	}
+
+
+	public static function isStatusOn(int $status): bool {
+		if($status & MemoryRegisterInterface::STATUS_ERROR)
+			return false;
+
+		if($status & MemoryRegisterInterface::STATUS_MANUAL_ON)
+			return true;
+
+		if($status & MemoryRegisterInterface::STATUS_MANUAL)
+			return false;
+
+		return (bool)($status & MemoryRegisterInterface::STATUS_ON);
+	}
+
+	public static function isStatusOff(int $status): bool {
+		if($status & MemoryRegisterInterface::STATUS_ERROR)
+			return true;
+
+		if($status & MemoryRegisterInterface::STATUS_MANUAL_ON)
+			return false;
+		if($status & MemoryRegisterInterface::STATUS_MANUAL)
+			return true;
+
+		return ($status & MemoryRegisterInterface::STATUS_OFF) && (0 == ($status & MemoryRegisterInterface::STATUS_ON));
+	}
+
+	public static function isStatusManual(int $status): bool {
+		return $status & MemoryRegisterInterface::STATUS_MANUAL_ON || $status & MemoryRegisterInterface::STATUS_MANUAL;
+	}
+
+	public static function isStatusError(int $status): bool {
+		return $status & MemoryRegisterInterface::STATUS_ERROR;
+	}
+
+	public static function isStatusPanel(int $status): bool {
+		return $status & MemoryRegisterInterface::STATUS_PANEL;
+	}
 }
