@@ -13,6 +13,9 @@ abstract class AbstractPlugin implements PluginInterface
 	/** @var null|string */
 	private $domain;
 
+	/** @var MemoryRegisterInterface */
+	protected $memoryRegister;
+
 	public static $defaultDomain = 'ikarus-default-domain';
 
 	/**
@@ -42,6 +45,7 @@ abstract class AbstractPlugin implements PluginInterface
 	 */
 	public function initialize(MemoryRegisterInterface $memoryRegister)
 	{
+		$this->memoryRegister = $memoryRegister;
 	}
 
 	/**
@@ -60,6 +64,28 @@ abstract class AbstractPlugin implements PluginInterface
 	{
 		$this->domain = $domain;
 		return $this;
+	}
+
+	/**
+	 * Use this method from automation to change the bricks state.
+	 *
+	 * @param bool|NULL $on
+	 * @param bool|NULL $err
+	 * @return int
+	 */
+	protected function statusChange(bool $on = NULL, bool $err = NULL): int {
+		$status = $this->memoryRegister->getStatus($this->getIdentifier());
+		if($on)
+			$status = static::statusEnable($status);
+		elseif($on === false)
+			$status = static::statusDisable($status);
+
+		if($err)
+			$status = static::statusError($status);
+		elseif($err === false)
+			$status = static::statusErrorRelease($status);
+		$this->memoryRegister->setStatus($status, $this->getIdentifier());
+		return $status;
 	}
 
 	/**
