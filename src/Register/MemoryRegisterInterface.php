@@ -14,11 +14,19 @@ use Ikarus\SPS\Alert\AlertInterface;
  */
 interface MemoryRegisterInterface
 {
+	/** @var int Marks identified brick to be ready for status */
 	const STATUS_REGISTER = 0;
+
+	/** @var int  */
 	const STATUS_OFF = 1<<0;
 	const STATUS_ON = 1<<1;
 	const STATUS_ERROR = 1<<2;
+
+	/** @var int Marks brick manual off state */
 	const STATUS_MANUAL = 1<<3;
+
+	/** @var int marks brick manual on state */
+	const STATUS_MANUAL_ON = 1<<4;
 
 	const STATUS_PANEL = 1<<5;
 
