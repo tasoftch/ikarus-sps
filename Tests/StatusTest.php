@@ -95,4 +95,25 @@ class StatusTest extends TestCase
 			}
 		}
 	}
+
+	public function testStatusManipulation() {
+		$status = AbstractPlugin::statusEnable( MR::STATUS_MANUAL | MR::STATUS_PANEL );
+
+		$this->assertTrue( (bool) ($status & MR::STATUS_ON) );
+		$this->assertFalse(AbstractPlugin::isStatusOn($status));
+		$this->assertTrue(AbstractPlugin::isStatusManual($status));
+
+		$status = AbstractPlugin::statusManualRelease($status);
+
+		$this->assertTrue( (bool) ($status & MR::STATUS_ON) );
+		$this->assertTrue(AbstractPlugin::isStatusOn($status));
+		$this->assertFalse(AbstractPlugin::isStatusManual($status));
+
+		$status = AbstractPlugin::statusError($status);
+
+		$this->assertTrue( (bool) ($status & MR::STATUS_ON) );
+		$this->assertFalse(AbstractPlugin::isStatusOn($status));
+		$this->assertFalse(AbstractPlugin::isStatusManual($status));
+		$this->assertTrue(AbstractPlugin::isStatusError($status));
+	}
 }

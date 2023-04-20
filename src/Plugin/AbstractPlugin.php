@@ -62,7 +62,12 @@ abstract class AbstractPlugin implements PluginInterface
 		return $this;
 	}
 
-
+	/**
+	 * Implements the required behaviour of a plugin on its status.
+	 *
+	 * @param int $status
+	 * @return bool
+	 */
 	public static function isStatusOn(int $status): bool {
 		if($status & MemoryRegisterInterface::STATUS_ERROR)
 			return false;
@@ -76,6 +81,12 @@ abstract class AbstractPlugin implements PluginInterface
 		return (bool)($status & MemoryRegisterInterface::STATUS_ON);
 	}
 
+	/**
+	 * Implements the required behaviour of a plugin on its status.
+	 *
+	 * @param int $status
+	 * @return bool
+	 */
 	public static function isStatusOff(int $status): bool {
 		if($status & MemoryRegisterInterface::STATUS_ERROR)
 			return true;
@@ -88,15 +99,65 @@ abstract class AbstractPlugin implements PluginInterface
 		return ($status & MemoryRegisterInterface::STATUS_OFF) && (0 == ($status & MemoryRegisterInterface::STATUS_ON));
 	}
 
+	/**
+	 * Implements the required behaviour of a plugin on its status.
+	 *
+	 * @param int $status
+	 * @return bool
+	 */
 	public static function isStatusManual(int $status): bool {
 		return $status & MemoryRegisterInterface::STATUS_MANUAL_ON || $status & MemoryRegisterInterface::STATUS_MANUAL;
 	}
 
+	/**
+	 * Implements the required behaviour of a plugin on its status.
+	 *
+	 * @param int $status
+	 * @return bool
+	 */
 	public static function isStatusError(int $status): bool {
 		return $status & MemoryRegisterInterface::STATUS_ERROR;
 	}
 
+	/**
+	 * Implements the required behaviour of a plugin on its status.
+	 *
+	 * @param int $status
+	 * @return bool
+	 */
 	public static function isStatusPanel(int $status): bool {
 		return $status & MemoryRegisterInterface::STATUS_PANEL;
+	}
+
+	/**
+	 * Sets the status to ON
+	 *
+	 * @param int $status
+	 * @return int
+	 */
+	public static function statusEnable(int $status): int {
+		return $status | MemoryRegisterInterface::STATUS_ON;
+	}
+
+	/**
+	 * Sets the status to OFF
+	 *
+	 * @param int $status
+	 * @return int
+	 */
+	public static function statusDisable(int $status): int {
+		return ($status | MemoryRegisterInterface::STATUS_OFF) & ~MemoryRegisterInterface::STATUS_ON;
+	}
+
+	public static function statusError(int $status): int {
+		return ($status | MemoryRegisterInterface::STATUS_ERROR);
+	}
+
+	public static function statusErrorRelease(int $status): int {
+		return ($status & ~MemoryRegisterInterface::STATUS_ERROR);
+	}
+
+	public static function statusManualRelease(int $status): int {
+		return $status & ~MemoryRegisterInterface::STATUS_MANUAL & ~MemoryRegisterInterface::STATUS_MANUAL_ON;
 	}
 }
