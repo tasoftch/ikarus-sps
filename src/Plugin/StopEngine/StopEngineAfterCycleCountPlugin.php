@@ -35,6 +35,7 @@
 namespace Ikarus\SPS\Plugin\StopEngine;
 
 
+use Ikarus\SPS\Exception\EngineControlException;
 use Ikarus\SPS\Plugin\AbstractPlugin;
 use Ikarus\SPS\Register\MemoryRegisterInterface;
 
@@ -66,8 +67,10 @@ class StopEngineAfterCycleCountPlugin extends AbstractPlugin
     public function update(MemoryRegisterInterface $memoryRegister)
     {
         $this->_counter++;
-        if($this->getCount() < $this->_counter)
-            $memoryRegister->stopEngine(-18, "Stop engine cycle count service");
+        if($this->getCount() < $this->_counter) {
+			$memoryRegister->stopEngine(-18, "Stop engine cycle count service");
+			throw (new EngineControlException( 'Stop engine cycle count service', EngineControlException::CONTROL_STOP_ENGINE ))->setControl( EngineControlException::CONTROL_STOP_ENGINE );
+		}
     }
 
     public function initialize(MemoryRegisterInterface $memoryRegister)

@@ -36,6 +36,7 @@ namespace Ikarus\SPS\Plugin\StopEngine;
 
 
 use DateTime;
+use Ikarus\SPS\Exception\EngineControlException;
 use Ikarus\SPS\Plugin\AbstractPlugin;
 use Ikarus\SPS\Register\MemoryRegisterInterface;
 
@@ -59,8 +60,10 @@ class StopEngineAtDatePlugin extends AbstractPlugin
     public function update(MemoryRegisterInterface $memoryRegister)
     {
         $dd = ($this->date->getTimestamp() + ($this->date->format("u") / 1e6)) - microtime(true);
-        if($dd <= 0)
-            $memoryRegister->stopEngine(-12, 'Stop engine date reached service');
+        if($dd <= 0) {
+			$memoryRegister->stopEngine(-12, 'Stop engine date reached service');
+			throw (new EngineControlException( 'Stop engine date reached service', EngineControlException::CONTROL_STOP_ENGINE ))->setControl( EngineControlException::CONTROL_STOP_ENGINE );
+		}
     }
 
     /**

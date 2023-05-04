@@ -34,6 +34,7 @@
 
 namespace Ikarus\SPS\Plugin\StopEngine;
 
+use Ikarus\SPS\Exception\EngineControlException;
 use Ikarus\SPS\Plugin\CharInput\AbstractCharacterInterpreterPlugin;
 use Ikarus\SPS\Register\MemoryRegisterInterface;
 
@@ -45,5 +46,6 @@ class StopEngineOnCharacterInput extends AbstractCharacterInterpreterPlugin
 
     protected function quitAction(MemoryRegisterInterface $management) {
         $management->stopEngine(-23, 'Stop engine char input service');
+		throw (new EngineControlException( 'Stop engine char input service', EngineControlException::CONTROL_STOP_ENGINE ))->setControl( EngineControlException::CONTROL_STOP_ENGINE );
     }
 }

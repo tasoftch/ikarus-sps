@@ -34,6 +34,7 @@
 
 namespace Ikarus\SPS\Plugin\StopEngine;
 
+use Ikarus\SPS\Exception\EngineControlException;
 use Ikarus\SPS\Plugin\AbstractPlugin;
 use Ikarus\SPS\Register\MemoryRegisterInterface;
 
@@ -62,8 +63,10 @@ class StopEngineAfterIntervalPlugin extends AbstractPlugin
     public function update(MemoryRegisterInterface $memoryRegister)
     {
         $diff = microtime(true) - $this->_startTS;
-        if($diff >= $this->getInterval())
-            $memoryRegister->stopEngine(-16, 'Stop engine time up service');
+        if($diff >= $this->getInterval()) {
+			$memoryRegister->stopEngine(-16, 'Stop engine time up service');
+			throw (new EngineControlException( 'Stop engine time up service', EngineControlException::CONTROL_STOP_ENGINE ))->setControl( EngineControlException::CONTROL_STOP_ENGINE );
+		}
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Ikarus\SPS\Plugin\StopEngine;
 
 
+use Ikarus\SPS\Exception\EngineControlException;
 use Ikarus\SPS\Plugin\AbstractPlugin;
 use Ikarus\SPS\Plugin\SetupPluginInterface;
 use Ikarus\SPS\Register\MemoryRegisterInterface;
@@ -49,6 +50,7 @@ class StopEngineIfFileExistsPlugin extends AbstractPlugin implements SetupPlugin
         if(file_exists( $this->getFilename() )) {
             $memoryRegister->stopEngine(-9, 'Stop engine file exists service');
             unlink($this->getFilename());
+			throw (new EngineControlException( 'Stop engine file exists service', EngineControlException::CONTROL_STOP_ENGINE ))->setControl( EngineControlException::CONTROL_STOP_ENGINE );
         }
     }
 }
