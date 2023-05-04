@@ -167,6 +167,11 @@ class InternalMemoryRegister implements MemoryRegisterInterface, EngineDependenc
 		// This method is only available on common memory registers.
 	}
 
+	public function registerBrick(string $brick, string $domain)
+	{
+		// This method is only available on common memory registers.
+	}
+
 
 	/**
 	 * @inheritDoc

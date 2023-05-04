@@ -159,4 +159,14 @@ interface MemoryRegisterInterface
 	 * @return bool
 	 */
 	public function acknowledgeAlert(int $alertID): bool;
+
+	/**
+	 * Some kinds of memory register needs to have all bricks registered.
+	 * Normally this is done while compiling the Ikarus SPS. If your application adds a dynamic brick after launching,
+	 * it should be registered using this method.
+	 *
+	 * @param string $brick
+	 * @param string $domain
+	 */
+	public function registerBrick(string $brick, string $domain);
 }
