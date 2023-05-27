@@ -30,6 +30,9 @@ interface MemoryRegisterInterface
 
 	const STATUS_PANEL = 1<<5;
 
+	const STATUS_RESERVED_1 = 1<<6;
+	const STATUS_RESERVED_2 = 1<<7;
+
 	/**
 	 * Stops the current cycle and restart it
 	 *
