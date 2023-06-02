@@ -13,6 +13,8 @@ abstract class AbstractPlugin implements PluginInterface
 	/** @var null|string */
 	private $domain;
 
+	private $value_cache = [];
+
 	/** @var MemoryRegisterInterface */
 	protected $memoryRegister;
 
@@ -185,5 +187,37 @@ abstract class AbstractPlugin implements PluginInterface
 
 	public static function statusManualRelease(int $status): int {
 		return $status & ~MemoryRegisterInterface::STATUS_MANUAL & ~MemoryRegisterInterface::STATUS_MANUAL_ON;
+	}
+
+	// Normalized Access to own values and commands declared in the plugin description
+
+	protected function putCommand($cmd, $info = NULL) {
+		$this->memoryRegister->putCommand($this->getIdentifier() . "." . $cmd, $info);
+	}
+
+	protected function clearCommand($cmd) {
+		$this->memoryRegister->clearCommand($this->getIdentifier() . "." . $cmd);
+	}
+
+	protected function getCommand($cmd) {
+		$this->memoryRegister->getCommand($this->getIdentifier() . "." . $cmd);
+	}
+
+	protected function hasCommand($cmd) {
+		$this->memoryRegister->hasCommand($this->getIdentifier() . "." . $cmd);
+	}
+
+	protected function putValue($value, string $key, bool $refresh = true) {
+		if($refresh)
+			$this->value_cache = $this->memoryRegister->fetchValue($this->getDomain(), $this->getIdentifier());
+		$this->value_cache[$key] = $value;
+		$this->memoryRegister->putValue($this->value_cache, $this->getIdentifier(), $this->getDomain());
+	}
+
+	protected function fetchValue(string $key = NULL, bool $refresh = true) {
+		if($refresh)
+			$this->value_cache = $this->memoryRegister->fetchValue($this->getDomain(), $this->getIdentifier());
+
+		return $key ? $this->value_cache[$key] : $this->value_cache;
 	}
 }
