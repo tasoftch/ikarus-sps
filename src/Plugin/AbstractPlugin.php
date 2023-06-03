@@ -20,6 +20,8 @@ abstract class AbstractPlugin implements PluginInterface
 
 	public static $defaultDomain = 'ikarus-default-domain';
 
+	protected $auto_register = true;
+
 	/**
 	 * AbstractPlugin constructor.
 	 * For Ikarus SPS compliance always let the first parameter as identifier.
@@ -48,6 +50,9 @@ abstract class AbstractPlugin implements PluginInterface
 	public function initialize(MemoryRegisterInterface $memoryRegister)
 	{
 		$this->memoryRegister = $memoryRegister;
+		if($this->auto_register) {
+			$memoryRegister->registerBrick($this->getIdentifier(), $this->getDomain());
+		}
 	}
 
 	/**
