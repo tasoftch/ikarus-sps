@@ -169,7 +169,8 @@ class InternalMemoryRegister implements MemoryRegisterInterface, EngineDependenc
 
 	public function registerBrick(string $brick, string $domain)
 	{
-		// This method is only available on common memory registers.
+		if(!isset($this->status[$brick]) || !$this->status[$brick])
+			$this->status[ $brick ] = self::STATUS_REGISTER;
 	}
 
 
