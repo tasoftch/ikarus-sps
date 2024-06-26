@@ -14,10 +14,10 @@ use Ikarus\SPS\Plugin\PluginInterface;
 
 class InternalMemoryRegister implements MemoryRegisterInterface, EngineDependencyInterface
 {
-	private $commands = [];
-	private $values = [];
-	private $status = [];
-	private $alerts = [];
+	protected $commands = [];
+	protected $values = [];
+	protected $status = [];
+	protected $alerts = [];
 
 	public static $alertCounter = 10;
 
