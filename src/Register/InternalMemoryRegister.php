@@ -149,6 +149,7 @@ class InternalMemoryRegister implements MemoryRegisterInterface, EngineDependenc
 		/** @var CriticalAlert $alert */
 		if($alert = $this->alerts[$alertID] ?? NULL) {
 			call_user_func($alert->getCallback());
+			unset($this->alerts[$alertID]);
 		}
 		return true;
 	}
