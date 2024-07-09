@@ -226,11 +226,14 @@ abstract class AbstractPlugin implements PluginInterface
 			list($domain, $key) = explode(".", $domain, 2);
 
 		if($domain && $key) {
-			return function($value = NULL) use ($domain, $key) {
+			$cache = [];
+			return function($value = NULL) use ($domain, $key, &$cache) {
 				if(func_num_args() < 1)
 					return $this->memoryRegister->fetchValue($domain, $value);
-				else
-					$this->memoryRegister->putValue($value, $key, $domain);
+				else {
+					if($value != $cache)
+						$this->memoryRegister->putValue($value, $key, $domain);
+				}
 				return $value;
 			};
 		}
