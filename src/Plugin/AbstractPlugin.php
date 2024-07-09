@@ -20,6 +20,8 @@ abstract class AbstractPlugin implements PluginInterface
 
 	protected $auto_register = true;
 
+	private $exposed_values = [];
+
 	/**
 	 * AbstractPlugin constructor.
 	 * For Ikarus SPS compliance always let the first parameter as identifier.
@@ -216,5 +218,22 @@ abstract class AbstractPlugin implements PluginInterface
 
 	protected function fetchValue(string $key) {
 		return $this->memoryRegister->fetchValue($this->getDomain(), $this->getIdentifier() . ".$key");
+	}
+
+
+	protected function registerExposedValue(string $domain, string $key = NULL): ?callable {
+		if(!$key)
+			list($domain, $key) = explode(".", $domain, 2);
+
+		if($domain && $key) {
+			return function($value = NULL) use ($domain, $key) {
+				if(func_num_args() < 1)
+					return $this->memoryRegister->fetchValue($domain, $value);
+				else
+					$this->memoryRegister->putValue($value, $key, $domain);
+				return $value;
+			};
+		}
+		return NULL;
 	}
 }
