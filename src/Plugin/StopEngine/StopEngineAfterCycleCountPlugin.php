@@ -67,7 +67,7 @@ class StopEngineAfterCycleCountPlugin extends AbstractPlugin
     public function update(MemoryRegisterInterface $memoryRegister)
     {
         $this->_counter++;
-        if($this->getCount() < $this->_counter) {
+        if($this->getCount() <= $this->_counter) {
 			$memoryRegister->stopEngine(-18, "Stop engine cycle count service");
 			throw (new EngineControlException( 'Stop engine cycle count service', EngineControlException::CONTROL_STOP_ENGINE ))->setControl( EngineControlException::CONTROL_STOP_ENGINE );
 		}
