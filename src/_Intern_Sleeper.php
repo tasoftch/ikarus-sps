@@ -62,10 +62,10 @@ class _Intern_Sleeper
 
 		if($useTicks) {
 			declare(ticks=1) {
-				usleep($this->timeout - (microtime(true) - $this->timer) * 1e6);
+				usleep((int) ($this->timeout - (microtime(true) - $this->timer) * 1e6 ) );
 			}
 		} else {
-			usleep($this->timeout - (microtime(true) - $this->timer) * 1e6);
+			usleep((int) ($this->timeout - (microtime(true) - $this->timer) * 1e6) );
 		}
 
 		finish:
