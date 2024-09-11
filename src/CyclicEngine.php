@@ -48,11 +48,12 @@ class CyclicEngine extends AbstractEngine
 
 	/**
 	 * CyclicEngine constructor.
-	 * Pass an interval in milli seconds (ms) ex: 2000 to update each 2 seconds.
+	 * Pass an interval in milli seconds (ms) ex: 2000 to update every 2 seconds.
+	 *
 	 * @param int $interval
 	 * @param string $name
 	 */
-    public function __construct(int $interval = 2000, $name = 'Ikarus SPS, (c) by TASoft Applications')
+    public function __construct(int $interval = 2000, string $name = 'Ikarus SPS, (c) by TASoft Applications')
     {
         parent::__construct($name);
         $this->interval = $interval;
@@ -136,16 +137,10 @@ class CyclicEngine extends AbstractEngine
 		};
 
 
-        while ($this->isRunning()) {
-            $waitFor = min(array_values($scheduler)) - microtime(true);
-            if($waitFor > 0) {
-                declare(ticks=1) {
-                    usleep($waitFor * 1e6);
-                }
-            }
+		$sleeper = new _Intern_Sleeper( $this->getInterval() );
 
-            if(!$this->isRunning())
-                break;
+        while ($this->isRunning()) {
+            $sleeper->reset();
 
             try {
 				if($memReg instanceof WorkflowDependentMemoryRegister)
@@ -167,24 +162,20 @@ class CyclicEngine extends AbstractEngine
             	$am->cyclicUpdate( $memReg );
 
 			foreach($this->getPlugins() as $idx => $plugin) {
-                if($scheduler[$plugin->getIdentifier()] < microtime(true)) {
-                    $schedule( $this->getInterval() );
-
-					try {
-						$GLOBALS["P_IDX"] = $idx;
-						$plugin->update($memReg);
-					} catch (EngineControlException $exception) {
-						if($stopCycle($exception))
-							continue 2;
-						elseif($stopEngine($exception)) {
-							;
-						}
-						elseif($crashEngine($exception)) {
-							return;
-						} else
-							throw $exception;
+				try {
+					$GLOBALS["P_IDX"] = $idx;
+					$plugin->update($memReg);
+				} catch (EngineControlException $exception) {
+					if($stopCycle($exception))
+						continue 2;
+					elseif($stopEngine($exception)) {
+						;
 					}
-                }
+					elseif($crashEngine($exception)) {
+						return;
+					} else
+						throw $exception;
+				}
             }
 
 			end_cycle:
@@ -195,6 +186,8 @@ class CyclicEngine extends AbstractEngine
 
 			if($memReg instanceof WorkflowDependentMemoryRegister)
 				$memReg->endCycle();
+
+			$sleeper->sleep();
         }
 
 		if($memReg instanceof WorkflowDependentMemoryRegister)
