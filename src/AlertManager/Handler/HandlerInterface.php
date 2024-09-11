@@ -24,6 +24,12 @@ interface HandlerInterface
 	public function handleAlert(int $alertID, int $code, int $level, string $message, ?string $affectedPlugins, int $timeStamp): int;
 
 	/**
+	 * @param int $alertID
+	 * @return void
+	 */
+	public function acknowledgeAlert(int $alertID);
+
+	/**
 	 * If the user did acknowledge the alert, inform back to the SPS core.
 	 * This method gets called every cycle, so it must be efficient and may not block or delay the process.
 	 *

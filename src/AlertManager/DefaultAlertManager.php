@@ -78,6 +78,13 @@ class DefaultAlertManager implements UpdatedAlertManagerInterface, EngineDepende
 		}
 	}
 
+	public function acknowledgeAlert(int $alertID)
+	{
+		foreach($this->getNotifiers() as $notifier) {
+			$notifier->acknowledgeAlert($alertID);
+		}
+	}
+
 	/**
 	 * @inheritDoc
 	 */

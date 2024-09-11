@@ -27,4 +27,12 @@ interface AlertManagerInterface
 	 * @param int $timeStamp
 	 */
 	public function dispatchAlert(int $alertID, int $code, int $level, string $message, ?string $affectedPlugins, int $timeStamp);
+
+	/**
+	 * Backcall to inform a specific alert was acknowledged.
+	 *
+	 * @param int $alertID
+	 * @return void
+	 */
+	public function acknowledgeAlert(int $alertID);
 }
